@@ -1,0 +1,30 @@
+version: '3.4'
+
+services:
+  compressor:
+    image: compressor
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+    ports:
+      - "8000:8000"
+    volumes:
+      - .:/app  # Maps the entire project directory to the container's /app directory
+      - ./media:/app/media  # Maps the media directory for uploaded and compressed files
+      - ./static:/app/static  # Maps the static directory for Django static files
+    environment:
+      - DJANGO_SETTINGS_MODULE=compressor.settings
+
+  nginx:
+    image: nginx:alpine
+    container_name: nginx
+    ports:
+      - "80:80"
+    volumes:
+      - .:/app  # Maps the entire project directory to the container's /app directory
+      - ./media:/app/media  # Maps the media folder
+      - ./static:/app/static  # Maps the static folder
+      - ./nginx.conf:/etc/nginx/nginx.conf  # Custom Nginx configuration
+    depends_on:
+      - compressor
+    restart: always
