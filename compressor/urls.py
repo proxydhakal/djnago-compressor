@@ -21,7 +21,7 @@ from django.conf.urls.static import static
 
 urlpatterns = [
     path('admin/', admin.site.urls),  # Admin URLs
-    path('', include('compressor_app.urls')),  # Include app-specific URLs
+    path('', include('apps.compressor_app.urls')),  # Include app-specific URLs
 ]+static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
 
 
