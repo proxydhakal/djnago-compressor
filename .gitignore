@@ -3,3 +3,7 @@
 env/
 media/input/
 media/output/
+venv/
+
+#Ignore Pychase
+__pycache__/
