@@ -13,25 +13,27 @@ import inspect
 
 
 class UserAccountManager(BaseUserManager):
-    def create_user(self, email, password=None):
+    def create_user(self, email, username, password=None):
         if not email:
             raise ValueError('User must have an email')
+        if not username:
+            raise ValueError('User must have a username')
 
         email = self.normalize_email(email)
-        user = self.model(email=email)
+        user = self.model(email=email, username=username)
         user.set_password(password)
         user.save(using=self._db)
         return user
 
-    def create_superuser(self, email, password=None):
-        user = self.create_user(email, password)
+    def create_superuser(self, email, username, password=None):
+        user = self.create_user(email, username, password)
         user.is_superuser = True
         user.is_staff = True
         user.is_active = True
         user.role = UserAccount.SUPER_ADMIN
-        user.set_password(password)
-        user.save()
+        user.save(using=self._db)
         return user
+
 
 
 
@@ -58,6 +60,7 @@ class UserAccount(AbstractBaseUser, PermissionsMixin):
 
     role = models.IntegerField(choices=ROLE_TYPES, default=1)
     email = models.EmailField(max_length=254, unique=True)
+    username = models.CharField(max_length=255, unique=True)
     full_name = models.CharField(max_length=255, blank=True, null=True)
     branch = models.CharField(max_length=10, blank=True, null=True, default='1')
     profile_image = models.ImageField(default='profile_pics/default.png', upload_to='media/profile_pics')
@@ -69,8 +72,9 @@ class UserAccount(AbstractBaseUser, PermissionsMixin):
     history = HistoricalRecords()
     objects = UserAccountManager()
 
-    USERNAME_FIELD = 'email'
-    
+    USERNAME_FIELD = 'username'
+    REQUIRED_FIELDS = ['email']
+
     def get_full_name(self):
         return f"{self.full_name}"
     

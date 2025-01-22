@@ -60,10 +60,9 @@ INSTALLED_APPS = [
 
     #THIRD PARTY
     'corsheaders',
-    'allauth',
-    'allauth.account',
     'simple_history',
     'import_export',
+    'drf_yasg',
 
 ]
 
@@ -76,7 +75,6 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'corsheaders.middleware.CorsMiddleware',  # Add this line
-    "allauth.account.middleware.AccountMiddleware",
     'simple_history.middleware.HistoryRequestMiddleware',
     'apps.accounts.middleware.RedirectLoginMiddleware',
 
@@ -102,12 +100,6 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'compressor.wsgi.application'
 
-AUTHENTICATION_BACKENDS = [
-    'django.contrib.auth.backends.ModelBackend',
-    'allauth.account.auth_backends.AuthenticationBackend',
-]
-
-ACCOUNT_ADAPTER = 'apps.accounts.account_adapter.NoNewUsersAccountAdapter'
 from import_export.formats.base_formats import CSV, XLSX
 IMPORT_FORMATS = [CSV, XLSX]
 EXPORT_FORMATS = [XLSX]
@@ -133,7 +125,7 @@ else:
         'default': {
             'ENGINE': 'django.db.backends.postgresql',
             'NAME': os.getenv('DB_NAME_DEV'),
-            'USER': 'nmsuser',
+            'USER': 'admin',
             'PASSWORD': os.getenv('DB_PASSWORD_DEV'),
             'HOST': os.getenv('DB_HOST_DEV'),
             'PORT': os.getenv('DB_PORT_DEV'),
@@ -244,10 +236,14 @@ CORS_ALLOW_METHODS = [
 ]
 
 REST_FRAMEWORK = {
-    'DEFAULT_RENDERER_CLASSES': [
-        'rest_framework.renderers.JSONRenderer',
-    ],
+    'DEFAULT_SCHEMA_CLASS': 'rest_framework.schemas.openapi.AutoSchema',
 }
+
+
+AUTHENTICATION_BACKENDS = [
+    'django.contrib.auth.backends.ModelBackend',
+    'apps.accounts.views.CustomBackend',  
+]
 
 # Redirect URLs
 LOGIN_REDIRECT_URL = '/'  

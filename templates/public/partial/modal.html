@@ -3,7 +3,7 @@
 <div class="modal fade" id="loginModal" tabindex="-1" aria-labelledby="loginModalLabel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
-            <form method="POST" action="{% url 'custom_login' %}" class="login100-form validate-form">
+            <form method="POST" action="{% url 'login' %}" class="login100-form validate-form">
                 {% csrf_token %}
                 <div class="modal-header">
                     <h5 class="modal-title" id="loginModalLabel">Admin Login</h5>
@@ -12,7 +12,7 @@
                 <div class="modal-body">
                     
                     <div class="form-group position-relative">
-                        <input type="email" class="form-control {% if form.login.errors %}is-invalid{% endif %}" id="email" name="login" placeholder="Email" value="" autocomplete="off" >
+                        <input type="text" class="form-control {% if form.username.errors %}is-invalid{% endif %}" id="username" name="username" placeholder="Username" value="" autocomplete="off" >
                         <i class="fas fa-user form-control-icon"></i>
                     </div>
                     <div class="form-group position-relative">
@@ -23,14 +23,15 @@
                 <div class="modal-footer">
                     <button type="submit" class="btn">Login</button>
                 </div>
-                {% if messages %}
-                    <ul>
-                        {% for message in messages %}
-                            <li>{{ message }}</li>
-                        {% endfor %}
-                    </ul>
-                {% endif %}
             </form>
         </div>
     </div>
 </div>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+    $(document).ready(function () {
+        {% if login_failed %}
+            $('#loginModal').modal('show');
+        {% endif %}
+    });
+</script>

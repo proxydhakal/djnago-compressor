@@ -5,7 +5,7 @@ class RedirectLoginMiddleware:
         self.get_response = get_response
 
     def __call__(self, request):
-        if request.path == '/accounts/login/':
+        if request.path == '/account/login/':
             return redirect('/')  # Redirect to the homepage
         response = self.get_response(request)
         return response

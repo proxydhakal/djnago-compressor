@@ -1,4 +1,4 @@
-{% extends "core/dashboard/base.html" %} 
+{% extends "dashboard/base.html" %} 
 {% load static %}
 {% block main %}
 <main>
@@ -16,67 +16,69 @@
             </div>
         </div>
         <div class="row">
+            <!-- Dashboard info widget 1: Total Compressed Files -->
             <div class="col-xl-3 col-md-6 mb-1 p-3">
-                <!-- Dashboard info widget 1-->
                 <div class="card border-start-lg border-start-primary h-75">
                     <div class="card-body">
                         <div class="d-flex align-items-center">
                             <div class="flex-grow-1">
-                                <div class="small fw-bold text-primary mb-1">Total Switch</div>
-                                <div class="h5">{{ totalSwitch }}</div>
+                                <div class="small fw-bold text-primary mb-1">Total Files Compressed</div>
+                                <div class="h5">{{ total_compressed_files }}</div>
                             </div>
                             <button class="btn btn-primary btn-sm m-1">
-                                <i class="fa-solid fa-network-wired text-gray-100"></i>
+                                <i class="fa-solid fa-compress text-gray-100"></i>
                             </button>
                         </div>
                     </div>
                 </div>
             </div>
+        
+            <!-- Dashboard info widget 2: Total Original Size -->
             <div class="col-xl-3 col-md-6 mb-1 p-3">
-                <!-- Dashboard info widget 2-->
                 <div class="card border-start-lg border-start-secondary h-75">
                     <div class="card-body">
                         <div class="d-flex align-items-center">
                             <div class="flex-grow-1">
-                                <div class="small fw-bold text-secondary mb-1">Total Router</div>
-                                <div class="h5">{{ totalRouter }}</div>
+                                <div class="small fw-bold text-secondary mb-1">Total Original Size</div>
+                                <div class="h5">{{ total_original_size_mb|floatformat:2 }} MB</div>
                             </div>
                             <button class="btn btn-secondary btn-sm m-1">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" class="bi bi-router-fill" viewBox="0 0 16 16">
-                                    <path d="M5.525 3.025a3.5 3.5 0 0 1 4.95 0 .5.5 0 1 0 .707-.707 4.5 4.5 0 0 0-6.364 0 .5.5 0 0 0 .707.707"/>
-                                    <path d="M6.94 4.44a1.5 1.5 0 0 1 2.12 0 .5.5 0 0 0 .708-.708 2.5 2.5 0 0 0-3.536 0 .5.5 0 0 0 .707.707Z"/>
-                                    <path d="M2.974 2.342a.5.5 0 1 0-.948.316L3.806 8H1.5A1.5 1.5 0 0 0 0 9.5v2A1.5 1.5 0 0 0 1.5 13H2a.5.5 0 0 0 .5.5h2A.5.5 0 0 0 5 13h6a.5.5 0 0 0 .5.5h2a.5.5 0 0 0 .5-.5h.5a1.5 1.5 0 0 0 1.5-1.5v-2A1.5 1.5 0 0 0 14.5 8h-2.306l1.78-5.342a.5.5 0 1 0-.948-.316L11.14 8H4.86zM2.5 11a.5.5 0 1 1 0-1 .5.5 0 0 1 0 1m4.5-.5a.5.5 0 1 1 1 0 .5.5 0 0 1-1 0m2.5.5a.5.5 0 1 1 0-1 .5.5 0 0 1 0 1m1.5-.5a.5.5 0 1 1 1 0 .5.5 0 0 1-1 0m2 0a.5.5 0 1 1 1 0 .5.5 0 0 1-1 0"/>
-                                    <path d="M8.5 5.5a.5.5 0 1 1-1 0 .5.5 0 0 1 1 0"/>
-                                  </svg>
+                                <i class="fa-solid fa-hdd text-gray-100"></i>
                             </button>
                         </div>
                     </div>
                 </div>
             </div>
+        
+            <!-- Dashboard info widget 3: Total Compressed Size -->
             <div class="col-xl-3 col-md-6 mb-1 p-3">
-                <!-- Dashboard info widget 3-->
                 <div class="card border-start-lg border-start-success h-75">
                     <div class="card-body">
                         <div class="d-flex align-items-center">
                             <div class="flex-grow-1">
-                                <div class="small fw-bold text-success mb-1">Total Firewall</div>
-                                <div class="h5">{{ totalFirewall }}</div>
+                                <div class="small fw-bold text-success mb-1">Total Compressed Size</div>
+                                <div class="h5">{{ total_compressed_size_mb|floatformat:2 }} MB</div>
                             </div>
                             <button class="btn btn-success btn-sm m-1">
-                                <i class="fa-solid fa-file-shield text-gray-100"></i>
+                                <i class="fa-solid fa-compress-arrows-alt text-gray-100"></i>
                             </button>
                         </div>
                     </div>
                 </div>
             </div>
+        
+            <!-- Dashboard info widget 4: Files Compressed by Type -->
             <div class="col-xl-3 col-md-6 mb-1 p-3">
-                <!-- Dashboard info widget 4-->
                 <div class="card border-start-lg border-start-info h-75">
                     <div class="card-body">
                         <div class="d-flex align-items-center">
                             <div class="flex-grow-1">
-                                <div class="small fw-bold text-info mb-1">Total Device</div>
-                                <div class="h5">{{ totalDevice }}</div>
+                                <div class="small fw-bold text-info mb-1">Compressed Files by Type</div>
+                                <ul>
+                                    {% for file_type in compressed_files_by_type_list %}
+                                        <li>{{ file_type.file_type }}: {{ file_type.count }} file(s)</li>
+                                    {% endfor %}
+                                </ul>
                             </div>
                             <button class="btn btn-info btn-sm m-1">
                                 <i class="fa-solid fa-list text-gray-100"></i>
@@ -85,68 +87,53 @@
                     </div>
                 </div>
             </div>
-            <div class="col-xl-3 col-md-6 mb-4">
-                <!-- Dashboard info widget 4-->
-                <div class="card border-start-lg border-start-danger h-75">
-                    <div class="card-body">
-                        <div class="d-flex align-items-center">
-                            <div class="flex-grow-1">
-                                <div class="small fw-bold text-info mb-1">Total Down Interface</div>
-                                <div class="h5">{{ totalDownInterFace }}</div>
-                            </div>
-                            <a class="btn btn-danger btn-sm m-1" href="{% url "down_interface_list" %}">
-                                <i class="fa-solid fa-eye text-gray-100"></i>
-                            </a>
-                        </div>
-                    </div>
-                </div>
-            </div>
         </div>
+        
     </div>
     <div class="container-xl px-4 mb-3 mx-auto">
         <div class="row">
             <div class="col-lg-6">
                 <!-- Pie chart example-->
                 <div class="card mb-4 h-100">
-                    <div class="card-header">Pie Chart Devices</div>
+                    <div class="card-header">Pie Chart File Compression by Type</div>
                     <div class="card-body">
                         <div class="chart-pie"><canvas id="myPieChart" height="100%"></canvas></div>
                     </div>
-                   <div class="card-footer small fw-bold">Data as of: <span id="todayDate"> {{ current_datetime }} </span></div>
+                    <div class="card-footer small fw-bold">Data as of: <span id="todayDate"> {{ current_datetime }} </span></div>
                 </div>
             </div>
             <div class="col-lg-6">
-                <!-- Pie chart example-->
+                <!-- Bar chart example-->
                 <div class="card mb-4 h-100">
-                    <div class="card-header">Bar Graph Devices</div>
+                    <div class="card-header">Bar Graph File Compression</div>
                     <div class="card-body">
                         <div class="myChart"><canvas id="myChart" width="100%" height="50"></canvas></div>
                     </div>
-                   <div class="card-footer small fw-bold">Data as of: <span id="todayDate">{{ current_datetime }}</span></div>
+                    <div class="card-footer small fw-bold">Data as of: <span id="todayDate">{{ current_datetime }}</span></div>
                 </div>
             </div>
         </div>
     </div>
-
 </main>
-<script src="{% static 'js/Chart.min.js' %}" ></script>
-<script id="deviceData" type="application/json">
+<script src="{% static 'dashboard/js/Chart.min.js' %}"></script>
+<script type="application/json" id="compressionData">
     {
-        "totalSwitch": {{ totalSwitch }},
-        "totalRouter": {{ totalRouter }},
-        "totalFirewall": {{ totalFirewall }},
-        "totalDevice": {{ totalDevice }}
+        "totalCompressedFiles": {{ total_compressed_files }},
+        "totalOriginalSizeMb": {{ total_original_size_mb }},
+        "totalCompressedSizeMb": {{ total_compressed_size_mb }},
+        "compressedFilesByType": {{ compressed_files_by_type|safe }}
     }
 </script>
+
 <script type="text/javascript">
 // Get the data from the JSON script tag
-var deviceData = JSON.parse(document.getElementById('deviceData').textContent);
+var compressionData = JSON.parse(document.getElementById('compressionData').textContent);
 
 // Now you can use the variables in JavaScript
-var totalSwitch = deviceData.totalSwitch;
-var totalRouter = deviceData.totalRouter;
-var totalFirewall = deviceData.totalFirewall;
-var totalDevice = deviceData.totalDevice;
+var totalCompressedFiles = compressionData.totalCompressedFiles;
+var totalOriginalSizeMb = compressionData.totalOriginalSizeMb;
+var totalCompressedSizeMb = compressionData.totalCompressedSizeMb;
+var compressedFilesByType = compressionData.compressedFilesByType;
 
 // Setting default Chart.js global settings
 (Chart.defaults.global.defaultFontFamily = "Metropolis"),
@@ -156,17 +143,23 @@ Chart.defaults.global.defaultFontColor = "#858796";
 // Pie Chart Example
 var ctx = document.getElementById("myPieChart");
 if (ctx) {
+    var labels = [];
+    var data = [];
+    compressedFilesByType.forEach(function(item) {
+        labels.push(item.file_type);  // File type as label
+        data.push(item.count);  // Count as data
+    });
+    
+    // Add "Total Compressed Files" as a separate label for the pie chart
+    labels.unshift("Total Compressed Files");
+    data.unshift(totalCompressedFiles);
+
     var myPieChart = new Chart(ctx, {
         type: "doughnut",
         data: {
-            labels: ["Total Device", "Total Switch", "Total Router", "Total Firewall"],
+            labels: labels,
             datasets: [{
-                data: [
-                    totalDevice,
-                    totalSwitch,
-                    totalRouter,
-                    totalFirewall
-                ],
+                data: data,
                 backgroundColor: [
                     "rgba(0, 97, 242, 1)",
                     "rgba(0, 172, 105, 1)",
@@ -202,32 +195,26 @@ if (ctx) {
     });
 }
 
-// Bar Chart Example
+// Bar Chart Example (Updated)
 var bar = document.getElementById('myChart');
 if (bar) {
     new Chart(bar, {
         type: 'bar',
         data: {
-            labels: ["Total Device", "Total Switch", "Total Router", "Total Firewall"],
+            labels: ["Total Original Size (MB)", "Total Compressed Size (MB)"],  // Removed Total Compressed Files
             datasets: [{
-                label: '# of Devices',
+                label: '# of Files',
                 data: [
-                    totalDevice,
-                    totalSwitch,
-                    totalRouter,
-                    totalFirewall
+                    totalOriginalSizeMb,
+                    totalCompressedSizeMb
                 ],
                 backgroundColor: [
                     "rgba(0, 97, 242, 1)",
-                    "rgba(0, 172, 105, 1)",
-                    "rgba(88, 0, 232, 1)",
-                    "rgba(88, 0, 232, 1)"
+                    "rgba(0, 172, 105, 1)"
                 ],
                 borderColor: [
                     "rgba(0, 97, 242, 1)",
-                    "rgba(0, 172, 105, 1)",
-                    "rgba(88, 0, 232, 1)",
-                    "rgba(88, 0, 232, 1)"
+                    "rgba(0, 172, 105, 1)"
                 ],
                 borderWidth: 1
             }]
@@ -243,5 +230,4 @@ if (bar) {
     });
 }
 </script>
-    
 {% endblock main %}

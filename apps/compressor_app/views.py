@@ -10,11 +10,13 @@ from django.conf import settings
 from datetime import datetime
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework import status
+from rest_framework.parsers import MultiPartParser, FormParser
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
+from django.conf import settings
 from PyPDF2 import PdfReader
+from apps.compressor_app.models import FileCompressLog
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -28,12 +30,8 @@ OUTPUT_DIR = os.path.join(settings.MEDIA_ROOT, 'output')
 os.makedirs(INPUT_DIR, exist_ok=True)
 os.makedirs(OUTPUT_DIR, exist_ok=True)
 
-
-def home(request):
-    """
-    Renders the index.html template.
-    """
-    return render(request, 'public/index.html')
+# Lock for thread-safe database operations
+db_lock = threading.Lock()
 
 
 def generate_compressed_filename(original_filename):
@@ -57,10 +55,9 @@ def determine_compression_level(input_pdf):
             if text:
                 has_text = True
             # Check for images (if any)
-            if '/XObject' in page['/Resources']:
+            if '/XObject' in page.get('/Resources', {}):
                 has_images = True
 
-            # If we found both text and images, we can stop checking
             if has_text and has_images:
                 break
 
@@ -74,6 +71,7 @@ def determine_compression_level(input_pdf):
     except Exception as e:
         logger.error(f"Error determining compression level for {input_pdf}: {e}")
         return "screen"  # Default to screen on error
+
 
 def compress_pdf(input_pdf, output_pdf):
     """
@@ -109,23 +107,90 @@ def compress_image(input_image, output_image):
         logger.error(f"Error compressing image {input_image}: {e}")
 
 
+def is_file_corrupted(file_path):
+    """
+    Check if a file is corrupted or contains unsupported metadata.
+    """
+    try:
+        file_extension = file_path.split('.')[-1].lower()
+
+        if file_extension == 'pdf':
+            # Attempt to read the PDF file
+            PdfReader(file_path)
+        elif file_extension in ['jpg', 'jpeg', 'png']:
+            # Attempt to open the image
+            with Image.open(file_path) as img:
+                img.verify()
+        else:
+            logger.warning(f"Unsupported file type: {file_extension}")
+            return True
+
+        return False  # File is valid
+    except Exception as e:
+        logger.error(f"File corruption/unsupported metadata detected in {file_path}: {e}")
+        return True  # File is corrupted
+
+
 def compress_files_concurrently(file_paths):
     """
-    Compress multiple files concurrently using threads.
+    Compress multiple files concurrently using threads and log the results.
     """
     threads = []
     output_files = []
 
+    def log_compression(file_path, output_path, original_size, compressed_size, file_type):
+        """
+        Log the compression details into FileCompressLog model.
+        """
+        try:
+            with db_lock:  # Ensure thread-safe DB operations
+                FileCompressLog.objects.create(
+                    file_name=os.path.basename(file_path),
+                    original_size=original_size,
+                    compressed_size=compressed_size,
+                    file_type=file_type,
+                    compressed_at=datetime.now()
+                )
+                logger.info(f"Logged compression for {file_path}")
+        except Exception as e:
+            logger.error(f"Error logging compression for {file_path}: {e}")
+
     for file_path in file_paths:
+        if is_file_corrupted(file_path):
+            logger.warning(f"Skipping corrupted or unsupported file: {file_path}")
+            continue
+
         output_filename = generate_compressed_filename(os.path.basename(file_path))
         output_path = os.path.join(OUTPUT_DIR, output_filename)
 
         # Determine file extension and choose the appropriate compression method
-        file_extension = file_path.split('.')[-1].lower()
-        if file_extension == 'pdf':
-            thread = threading.Thread(target=compress_pdf, args=(file_path, output_path))
-        elif file_extension in ['jpg', 'jpeg', 'png']:
-            thread = threading.Thread(target=compress_image, args=(file_path, output_path))
+        file_extension = os.path.splitext(file_path)[1].lower()
+        if file_extension == '.pdf':
+            thread = threading.Thread(
+                target=lambda: (
+                    compress_pdf(file_path, output_path),
+                    log_compression(
+                        file_path,
+                        output_path,
+                        os.path.getsize(file_path),
+                        os.path.getsize(output_path) if os.path.exists(output_path) else 0,
+                        "PDF"
+                    )
+                )
+            )
+        elif file_extension in ['.jpg', '.jpeg', '.png']:
+            thread = threading.Thread(
+                target=lambda: (
+                    compress_image(file_path, output_path),
+                    log_compression(
+                        file_path,
+                        output_path,
+                        os.path.getsize(file_path),
+                        os.path.getsize(output_path) if os.path.exists(output_path) else 0,
+                        "Image"
+                    )
+                )
+            )
         else:
             logger.warning(f"Unsupported file type: {file_extension}")
             continue
@@ -137,9 +202,10 @@ def compress_files_concurrently(file_paths):
     for thread in threads:
         thread.start()
     for thread in threads:
-        thread.join()
+        thread.join()  # Ensure each thread completes before moving forward
 
     return output_files
+
 
 
 def upload_and_compress(request):
@@ -170,7 +236,7 @@ def upload_and_compress(request):
 
     return render(request, 'public/compress_pdf.html')
 
-
+from apps.compressor_app.serializers import FileUploadSerializer
 class FileUploadCompressAPIView(APIView):
     """
     API view to handle file upload and compression.
@@ -179,32 +245,14 @@ class FileUploadCompressAPIView(APIView):
     parser_classes = (MultiPartParser, FormParser)
 
     @swagger_auto_schema(
-        operation_description="Upload multiple files (PDFs, images) and compress them.",
-        request_body=openapi.Schema(
-            type=openapi.TYPE_OBJECT,
-            properties={
-                'files': openapi.Schema(
-                    type=openapi.TYPE_ARRAY,
-                    items=openapi.Items(type=openapi.TYPE_FILE),
-                    description="List of files to be uploaded and compressed",
-                ),
-            },
-        ),
-        responses={
-            200: openapi.Response(
-                description="Files compressed successfully",
-                examples={
-                    "application/json": {
-                        "files": [
-                            "/media/output/compressed_file1.pdf",
-                            "/media/output/compressed_file2.png"
-                        ]
-                    }
-                },
-            ),
-            400: openapi.Response(description="No files provided"),
-            500: openapi.Response(description="Internal server error")
-        }
+        request_body=None,  # Disable automatic schema generation for the body
+        manual_parameters=[  # Manually define the file fields as formData
+            openapi.Parameter(
+                'files', openapi.IN_FORM, description="List of files to upload", required=True,
+                type=openapi.TYPE_ARRAY, items=openapi.Items(type=openapi.TYPE_FILE)
+            )
+        ],
+        operation_description="Upload multiple files"
     )
     def post(self, request, *args, **kwargs):
         files = request.FILES.getlist('files')
@@ -224,7 +272,7 @@ class FileUploadCompressAPIView(APIView):
             output_files = compress_files_concurrently(uploaded_files)
             compressed_files = [
                 os.path.join(settings.MEDIA_URL, 'output', os.path.basename(f))
-                for f in output_files
+                for f in output_files if os.path.exists(f)
             ]
             return Response({"files": compressed_files}, status=status.HTTP_200_OK)
         except Exception as e:

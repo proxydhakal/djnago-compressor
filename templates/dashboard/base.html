@@ -1,41 +1,40 @@
 {% load static %}
-{% load custom_filters %}
 <!DOCTYPE html>
 <html lang="en">
     <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-        <title>NMS</title>
+        <title>Sanima Compress Admin</title>
         <meta charset="UTF-8">
         <meta name="author" content="Shekhar Dhakal">
         <meta name="system-version" content="v1.0.0">
         <meta name="keywords" content="NMS, Network, System">
         <meta name="description" content="NMS is a web application dedicated to network automation, offering users access to routes and switched.">
-        <link rel="icon" type="image/x-icon" href="{% static 'images/sanima-favicon.svg' %}">
+        <link rel="icon" type="image/x-icon" href="{% static 'dashboard/images/sanima-favicon.svg' %}">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <link rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}">
-        <link rel="stylesheet" href="{% static 'css/dashboard.css' %}">
-        <link rel="stylesheet" href="{% static 'css/fileinput.min.css' %}">
-        <link rel="stylesheet" href="{% static 'css/toastr.min.css' %}">
+        <link rel="stylesheet" href="{% static 'dashboard/css/bootstrap.min.css' %}">
+        <link rel="stylesheet" href="{% static 'dashboard/css/dashboard.css' %}">
+        <link rel="stylesheet" href="{% static 'dashboard/css/fileinput.min.css' %}">
+        <link rel="stylesheet" href="{% static 'dashboard/css/toastr.min.css' %}">
 
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width">
-        <link rel="stylesheet" href="{% static 'css/fonts.css' %}">
-        <link rel="stylesheet" href="{% static 'css/flatpickr.min.css' %}">
-        <link rel="stylesheet" href="{% static 'css/select2.min.css' %}">
-        <script src="{% static 'js/jquery-3.7.1.min.js' %}" ></script>
+        <link rel="stylesheet" href="{% static 'dashboard/css/fonts.css' %}">
+        <link rel="stylesheet" href="{% static 'dashboard/css/flatpickr.min.css' %}">
+        <link rel="stylesheet" href="{% static 'dashboard/css/select2.min.css' %}">
+        <script src="{% static 'dashboard/js/jquery-3.7.1.min.js' %}" ></script>
         <link href="https://cdn.datatables.net/v/dt/jszip-3.10.1/dt-2.1.8/af-2.7.0/b-3.2.0/b-colvis-3.2.0/b-html5-3.2.0/b-print-3.2.0/cr-2.0.4/date-1.5.4/fc-5.0.4/fh-4.0.1/kt-2.12.1/r-3.0.3/rg-1.5.1/rr-1.5.0/sc-2.4.3/sb-1.8.1/sp-2.3.3/sl-2.1.0/sr-1.4.1/datatables.min.css" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/pdfmake.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/vfs_fonts.js"></script>
 <script src="https://cdn.datatables.net/v/dt/jszip-3.10.1/dt-2.1.8/af-2.7.0/b-3.2.0/b-colvis-3.2.0/b-html5-3.2.0/b-print-3.2.0/cr-2.0.4/date-1.5.4/fc-5.0.4/fh-4.0.1/kt-2.12.1/r-3.0.3/rg-1.5.1/rr-1.5.0/sc-2.4.3/sb-1.8.1/sp-2.3.3/sl-2.1.0/sr-1.4.1/datatables.min.js"></script>
-        <script src="{% static 'js/flatpickr.js' %}" ></script>
+        <script src="{% static 'dashboard/js/flatpickr.js' %}" ></script>
         
 
     </head>
     <body class="nav-fixed">
         <nav class="topnav navbar navbar-expand shadow justify-content-between justify-content-sm-start navbar-light bg-white" id="sidenavAccordion">
             <button class="btn btn-icon btn-transparent-dark order-1 order-lg-0 me-2 ms-lg-2 me-lg-0" id="sidebarToggle"><i data-feather="menu"></i></button>
-            <a class="navbar-brand pe-3 ps-4 ps-lg-2" href="{% url 'dashboard' %}"><img class="img-fluid w-75 h-25" src="{% static 'images/sanima-logo.svg' %}" alt="Logo"></a>
+            <a class="navbar-brand pe-3 ps-4 ps-lg-2" href="{% url 'dashboard' %}"><img class="img-fluid w-75 h-25" src="{% static 'dashboard/images/sanima-logo.svg' %}" alt="Logo"></a>
             <form class="form-inline me-auto d-none d-lg-block me-3">
                 <div class="input-group input-group-joined input-group-solid">
                     <input class="form-control pe-0" type="search" placeholder="Search" aria-label="Search" />
@@ -69,17 +68,10 @@
                             <div class="dropdown-item-icon"><i data-feather="settings"></i></div>
                             Account
                         </a>
-                        {% if request.session.is_user_logged_in %}
-                        <a class="dropdown-item" href="{% url 'accounts:ad_logout' %}" onclick="return confirmLogout();">
-                            <div class="dropdown-item-icon"><i data-feather="log-out"></i></div>
-                            Logout
-                        </a>
-                        {% else %}
                         <a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#logoutModal">
                             <div class="dropdown-item-icon"><i data-feather="log-out"></i></div>
                             Logout
-                        </a>
-                        {% endif %}                        
+                        </a>                                        
                     </div>
                 </li>
             </ul>
@@ -124,143 +116,16 @@
                             <div class="collapse" id="collapseDashboards1" data-bs-parent="#accordionSidenav">
                                 <nav class="sidenav-menu-nested nav accordion" id="accordionSidenavPages">
                                     {% if perms.core.add_device %}
-                                        <a class="nav-link" href="{% url 'view_device_branch' %}">Manage Device</a>
+                                        <a class="nav-link" href="{">Manage Device</a>
                                     {% endif %}
                                     {% if perms.core.backup_device %}
-                                        <a class="nav-link" href="{% url 'all_device_backup_log' %}">All Device Backup</a>
-                                        <a class="nav-link" href="{% url 'read_backup_log' %}">View Device Backup Log</a>
+                                        <a class="nav-link" href="">All Device Backup</a>
+                                        <a class="nav-link" href="">View Device Backup Log</a>
                                     {% endif %}
                                 </nav>
                             </div>
                             {% endif %}
                             {% comment %} ROUTER SWITCH MANAGE MENU {% endcomment %}
-
-                            {% comment %} START VLAN MENU {% endcomment %}
-                            {% if perms.core.add_uservlanchangelog or perms.core.change_uservlanchangelog or perms.core.view_uservlanchangelog %}
-                            <a class="nav-link collapsed" href="javascript:void(0);" data-bs-toggle="collapse" data-bs-target="#collapseDashboards2" aria-expanded="false" aria-controls="collapseDashboards">
-                                <div class="nav-link-icon"><i class="fa-solid fa-wifi"></i></div>
-                                VLAN
-                                <div class="sidenav-collapse-arrow"><i class="fas fa-angle-down"></i></div>
-                            </a>
-                            <div class="collapse" id="collapseDashboards2" data-bs-parent="#accordionSidenav">
-                                <nav class="sidenav-menu-nested nav accordion" id="accordionSidenavPages">
-                                    {% if perms.core.add_uservlanchangelog %}
-                                    <a class="nav-link" href="{% url "change_vlan" %}">
-                                        CHANGE VLAN
-                                    </a>
-                                    {% endif %}
-                                </nav>
-                            </div>
-                            {% endif %}
-                            {% comment %} END VLAN MENU {% endcomment %}
-                            {% comment %} START VLAN MENU {% endcomment %}
-                            {% if perms.core.add_useraclchangelog or perms.core.change_useraclchangelog or perms.core.view_useraclchangelog %}
-                            <a class="nav-link collapsed" href="javascript:void(0);" data-bs-toggle="collapse" data-bs-target="#collapseDashboards3" aria-expanded="false" aria-controls="collapseDashboards">
-                                <div class="nav-link-icon"><i class="fa-solid fa-network-wired"></i></div>
-                                ACL
-                                <div class="sidenav-collapse-arrow"><i class="fas fa-angle-down"></i></div>
-                            </a>
-                            <div class="collapse" id="collapseDashboards3" data-bs-parent="#accordionSidenav">
-                                <nav class="sidenav-menu-nested nav accordion" id="accordionSidenavPages">
-                                    {% if perms.core.add_useraclchangelog %}
-                                    <a class="nav-link" href="{% url "change_acl_request" %}">
-                                        CHANGE ACL
-                                    </a>
-                                    {% endif %}
-                                </nav>
-                            </div>
-                            {% endif %}
-                            {% comment %} END VLAN MENU {% endcomment %}
-                            {% comment %} START VLAN MENU {% endcomment %}
-                            {% if perms.core.add_branchroutersetuplog or perms.core.change_branchroutersetuplog or perms.core.view_branchroutersetuplog %}
-                            <a class="nav-link collapsed" href="javascript:void(0);" data-bs-toggle="collapse" data-bs-target="#collapseDashboards4" aria-expanded="false" aria-controls="collapseDashboards">
-                                <div class="nav-link-icon"><i class="fas fa-code-branch"></i></div>
-                                NEW BRACNH SETUP
-                                <div class="sidenav-collapse-arrow"><i class="fas fa-angle-down"></i></div>
-                            </a>
-                            <div class="collapse" id="collapseDashboards4" data-bs-parent="#accordionSidenav">
-                                <nav class="sidenav-menu-nested nav accordion" id="accordionSidenavPages">
-                                    {% if perms.core.add_branchroutersetuplog %}
-                                    <a class="nav-link" href="{% url "new_branch_setup_router" %}">
-                                        BRANCH SETUP ROUTER
-                                    </a>
-                                    {% endif %}
-                                    <a class="nav-link" href="{% url "new_branch_setup_switch" %}">
-                                        BRANCH SETUP SWITCH
-                                    </a>
-                                </nav>
-                            </div>
-                            {% endif %}
-                            {% comment %} END VLAN MENU {% endcomment %}
-                            {% comment %} START VLAN MENU {% endcomment %}
-                            {% if perms.core.add_usermacbindinglog or perms.core.change_usermacbindinglog or perms.core.view_usermacbindinglog %}
-                            <a class="nav-link collapsed" href="javascript:void(0);" data-bs-toggle="collapse" data-bs-target="#collapseDashboards5" aria-expanded="false" aria-controls="collapseDashboards">
-                                <div class="nav-link-icon"><i class="fa fa-address-card" aria-hidden="true"></i></div>
-                                MAC
-                                <div class="sidenav-collapse-arrow"><i class="fas fa-angle-down"></i></div>
-                            </a>
-                            <div class="collapse" id="collapseDashboards5" data-bs-parent="#accordionSidenav">
-                                <nav class="sidenav-menu-nested nav accordion" id="accordionSidenavPages">
-                                    {% if perms.core.add_usermacbindinglog %}
-                                    <a class="nav-link" href="{% url "mac_binding_request" %}">
-                                        BRANCH MAC BINDING
-                                    </a>
-                                    {% endif %}
-                                    {% if perms.core.add_usermacbindinglog %}
-                                    <a class="nav-link" href="{% url "port_security_voilation" %}">
-                                        BRANCH MAC SECURITY PORT VIOLATION
-                                    </a>
-                                    {% endif %}
-                                </nav>
-                            </div>
-                            {% endif %}
-                            {% comment %} END VLAN MENU {% endcomment %}
-                            {% comment %} START MONITORING MENU {% endcomment %}
-                            {% if perms.monitor.add_bandwidthmonitoring or perms.monitor.change_bandwidthmonitoring or perms.monitor.view_bandwidthmonitoring %}
-                            <a class="nav-link collapsed" href="javascript:void(0);" data-bs-toggle="collapse" data-bs-target="#collapseDashboards6" aria-expanded="false" aria-controls="collapseDashboards">
-                                <div class="nav-link-icon"><i class="fa fa-desktop" aria-hidden="true"></i></div>
-                                Bandwidth Monitoring
-                                <div class="sidenav-collapse-arrow"><i class="fas fa-angle-down"></i></div>
-                            </a>
-                            <div class="collapse" id="collapseDashboards6" data-bs-parent="#accordionSidenav">
-                                <nav class="sidenav-menu-nested nav accordion" id="accordionSidenavPages">
-                                    {% if perms.monitor.add_bandwidthmonitoring %}
-                                    <a class="nav-link" href="{% url "bandwidth_monitoring" %}">
-                                        CREATE NEW BANDWIDTH RECORDS
-                                    </a>
-                                    {% endif %}
-                                    {% if perms.monitor.add_bandwidthmonitoring %}
-                                    <a class="nav-link" href="{% url "bandwidth_monitoring_report" %}">
-                                        GENERATE REPORT
-                                    </a>
-                                    {% endif %}
-                                </nav>
-                            </div>
-                            {% endif %}
-                            {% comment %} END VLAN MENU {% endcomment %}
-                            {% comment %} START BRANCH LAN DOWN MONITORING {% endcomment %}
-                            {% if perms.monitor.add_branchdownstatus or perms.monitor.change_branchdownstatus or perms.monitor.view_branchdownstatus %}
-                            <a class="nav-link collapsed" href="javascript:void(0);" data-bs-toggle="collapse" data-bs-target="#collapseDashboards7" aria-expanded="false" aria-controls="collapseDashboards">
-                                <div class="nav-link-icon"><i class="fa-solid fa-ethernet"></i></div>
-                                Branch Lan Monitoring
-                                <div class="sidenav-collapse-arrow"><i class="fas fa-angle-down"></i></div>
-                            </a>
-                            <div class="collapse" id="collapseDashboards7" data-bs-parent="#accordionSidenav">
-                                <nav class="sidenav-menu-nested nav accordion" id="accordionSidenavPages">
-                                    {% if perms.monitor.view_branchdownstatus %}
-                                    <a class="nav-link" href="{% url "branch_lan_monitoring" %}">
-                                        VIEW RECORDS
-                                    </a>
-                                    {% endif %}
-                                    {% if perms.monitor.view_branchdownstatus %}
-                                    <a class="nav-link" href="{% url "branch_lan_monitoring_report" %}">
-                                        GENERATE REPORT
-                                    </a>
-                                    {% endif %}
-                                </nav>
-                            </div>
-                            {% endif %}
-                            {% comment %} END VLAN MENU {% endcomment %}
                         
                         </div>
                     </div>
@@ -268,7 +133,7 @@
                         <div class="sidenav-footer-content">
                             <div class="sidenav-footer-subtitle">Logged in as:</div>
                             <div class="sidenav-footer-title" style="font-size: 15px;">
-                                {% if request.user.email %}{{ request.user.email|email_username }}{% else %}{{ request.session.username }}{% endif %}
+                                {{ request.user.username }}
                             </div>
                         </div>
                     </div>
@@ -303,20 +168,14 @@
                         </div>
                         <div class="modal-footer">
                             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                            <form method="post" action="{% url 'account_logout' %}">
-                                {% csrf_token %}
-                                {% if redirect_field_value %}
-                                <input type="hidden" name="{{ redirect_field_name }}" value="{{ redirect_field_value }}"/>
-                                {% endif %}
-                                <button type="submit" class="btn btn-primary btn-block text-center">Logout</button>
-                            </form>
+                            <a href="{% url 'logout' %}" class="btn btn-primary">Logout</a>
                         </div>
                     </div>
                 </div>
             </div>          
         </div>
         <div id="spinner" style="display: none;">
-            <img src="{% static 'images/loader.gif' %}" alt="Loading..." />
+            <img src="{% static 'dashboard/images/loader.gif' %}" alt="Loading..." />
         </div>
         <style>
         #spinner {
@@ -355,11 +214,11 @@
                 font-size: 12px !important;
             }
         </style>
-        <script src="{% static 'js/sb-customizer.js' %}" ></script>
-        <script src="{% static 'js/bootstraps.bundle.min.js' %}" ></script>
-        <script src="{% static 'js/scripts.js' %}" ></script>
-        <script src="{% static 'js/all.min.js' %}" ></script>
-        <script src="{% static 'js/feather.min.js' %}" ></script>
+        <script src="{% static 'dashboard/js/sb-customizer.js' %}" ></script>
+        <script src="{% static 'dashboard/js/bootstraps.bundle.min.js' %}" ></script>
+        <script src="{% static 'dashboard/js/scripts.js' %}" ></script>
+        <script src="{% static 'dashboard/js/all.min.js' %}" ></script>
+        <script src="{% static 'dashboard/js/feather.min.js' %}" ></script>
         
 
         <script>
@@ -388,13 +247,8 @@
             })(jQuery);
             
         </script>
-        <script>
-            function confirmLogout() {
-                return confirm("Are you sure you want to log out?");
-            }
-        </script>
-        <script src="{% static 'js/select2.min.js' %}" ></script>
-        <script src="{% static 'js/fileinput.min.js' %}" ></script>
+        <script src="{% static 'dashboard/js/select2.min.js' %}" ></script>
+        <script src="{% static 'dashboard/js/fileinput.min.js' %}" ></script>
         <script>
             (function($) {
                 $(document).ready(function() {
@@ -411,8 +265,8 @@
                 });
             })(jQuery);
         </script>
-        <script src="{% static 'js/toastr.min.js' %}" ></script>
-        <script src="{% static 'js/popper.min.js' %}" ></script>
+        <script src="{% static 'dashboard/js/toastr.min.js' %}" ></script>
+        <script src="{% static 'dashboard/js/popper.min.js' %}" ></script>
         <script>
         
         toastr.options = {

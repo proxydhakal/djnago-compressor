@@ -5,3 +5,35 @@
 <script src="{% static 'public/js/fileinput.min.js' %}" ></script>
 <script src="{% static 'public/js/toastr.min.js' %}" ></script>
 <script src="{% static 'public/js/popper.min.js' %}" ></script>
+<script>
+toastr.options = {
+    "closeButton": true,
+    "debug": false,
+    "newestOnTop": true,
+    "progressBar": true,
+    "positionClass": "toast-bottom-right",
+    "preventDuplicates": true,
+    "onclick": null,
+    "showDuration": "300",
+    "hideDuration": "1000",
+    "timeOut": "5000",
+    "extendedTimeOut": "1000",
+    "showEasing": "swing",
+    "hideEasing": "linear",
+    "showMethod": "fadeIn",
+    "hideMethod": "fadeOut"
+    }
+    {% if messages %}
+    {% for message in messages %}
+    {% if message.tags == 'success' %}
+        toastr["success"]("{{ message }}", "SANIMA COMPRESSOR");
+    {% elif message.tags == 'error' %}
+        toastr["error"]("{{ message }}", "SANIMA COMPRESSOR");
+    {% elif message.tags == 'info' %}
+        toastr["info"]("{{ message }}", "SANIMA COMPRESSOR");
+    {% elif message.tags == 'warning' %}
+        toastr["warning"]("{{ message }}", "SANIMA COMPRESSOR");
+    {% endif %}
+    {% endfor %}
+{% endif %}
+</script>
