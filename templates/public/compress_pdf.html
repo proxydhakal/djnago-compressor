@@ -1,0 +1,141 @@
+{% extends "public/partial/base.html" %} 
+{% load static %}
+{% block navbar %}
+{% include "public/partial/navbar.html" %}
+{% endblock navbar %}
+{% block main %}
+<!-- Hero Section -->
+<div class="hero">
+    <h1>Try PDF Compression</h1>
+    <p>Upload your PDF files and compress them with ease!</p>
+</div>
+
+<!-- Form Section -->
+<div class="form-container mt-3 mb-3 p-3">
+    <h2>Compress Your PDF</h2>
+    <form id="uploadForm" enctype="multipart/form-data" method="POST">
+        {% csrf_token %}
+        <div class="mb-3">
+            <label for="pdfFile" class="form-label">Upload PDF Files</label>
+            <input id="pdfFile" name="pdfFiles[]" type="file" multiple class="file" accept=".pdf, .jpg, .jpeg, .png" multiple data-preview-file-type="any">
+        </div>
+        <button type="submit" class="btn btn-primary w-100">Compress PDF</button>
+    </form>
+
+    <!-- Progress Bar Section -->
+    <div class="progress-container">
+        <p>Compressing your PDFs... Please wait!</p>
+        <div class="progress">
+            <div id="progressBar" class="progress-bar"></div>
+        </div>
+    </div>
+</div>
+<style>
+    .hero {
+        padding: 4rem 0 !important;
+        text-align: center !important;
+        background: linear-gradient(135deg, #005b31, #0057A0) !important;
+        color: white !important;
+    }
+
+    .hero h1 {
+        font-size: 2rem !important;
+        font-weight: bold !important;
+        animation: fadeInUp 2s ease-out !important;
+    }
+
+    .hero p {
+        font-size: 1rem !important;
+        margin-top: 0.5rem !important;
+        animation: fadeInUp 2s ease-out 0.5s !important;
+    }
+</style>
+<script src="{% static 'public/js/jquery-3.6.0.min.js' %}" ></script>
+<script>
+    $(document).ready(function () {
+        // Initialize file input
+        $("#pdfFile").fileinput({
+            theme: "fas",
+            allowedFileExtensions: ["pdf", "jpg", "jpeg", "png"],
+            maxFileCount: 5,
+            showRemove: true,
+            dropZoneEnabled: true,
+            showPreview: true,
+            previewFileType: "any",
+            initialCaption: "Select files to upload",
+        });
+
+        // Function to get CSRF token from cookies
+        function getCSRFToken() {
+            const cookies = document.cookie.split(';');
+            for (let cookie of cookies) {
+                const [name, value] = cookie.trim().split('=');
+                if (name === 'csrftoken') {
+                    return value;
+                }
+            }
+            return null;
+        }
+
+        // Form submission handler
+        $("#uploadForm").on("submit", function (e) {
+            e.preventDefault();
+
+            // Show progress container and reset progress bar
+            $(".progress-container").fadeIn();
+            $("#progressBar").css("width", "0%");
+
+            const formData = new FormData(this);
+
+            // AJAX request to the backend
+            $.ajax({
+                url: "{% url 'upload_and_compress' %}", // Django URL for the view
+                type: "POST",
+                data: formData,
+                processData: false,
+                contentType: false,
+                headers: {
+                    'X-CSRFToken': getCSRFToken(), // Add CSRF token to headers
+                },
+                beforeSend: function () {
+                    let progress = 0;
+                    const interval = setInterval(() => {
+                        progress += 10;
+                        $("#progressBar").css("width", `${progress}%`);
+                        if (progress >= 100) {
+                            clearInterval(interval);
+                        }
+                    }, 500);
+                },
+                success: function (response) {
+                    $(".progress-container").fadeOut();
+                    if (response.files) {
+                        let downloadLinks = "";
+                        response.files.forEach(file => {
+                            downloadLinks += `<a href="${file}" class="btn btn-success mt-2" download>Download ${file.split('/').pop()}</a><br>`;
+                        });
+                        $(".form-container").append(`<div>${downloadLinks}</div>`);
+                        alert("Compression completed successfully!");
+                    } else {
+                        alert("Compression completed, but no files were found.");
+                    }
+                },
+                error: function () {
+                    $(".progress-container").fadeOut();
+                    alert("An error occurred during compression. Please try again.");
+                },
+            });
+        });
+    });
+</script>
+{% endblock main %}
+{% block footer %}
+{% include "public/partial/footer.html" %}
+{% endblock footer %}
+{% block modal %}
+{% include "public/partial/modal.html" %}
+{% endblock modal %}
+{% block scripts %}
+{% include "public/partial/scripts.html" %}
+{% endblock scripts %}
+

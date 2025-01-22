@@ -1,4 +1,5 @@
 import os
+import shutil
 import threading
 import logging
 import subprocess
@@ -13,6 +14,7 @@ from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework import status
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
+from PyPDF2 import PdfReader
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -31,22 +33,53 @@ def home(request):
     """
     Renders the index.html template.
     """
-    return render(request, 'index.html')
+    return render(request, 'public/index.html')
 
 
 def generate_compressed_filename(original_filename):
     """
-    Generate a new filename with the format Shekhar-Compress_timestamp.extension
+    Return the original filename without any modifications.
     """
-    timestamp = datetime.now().strftime('%Y%m%d%H%M%S')
-    name, extension = os.path.splitext(original_filename)
-    return f"Shekhar-Compress_{timestamp}{extension}"
+    return original_filename
 
 
-def compress_pdf(input_pdf, output_pdf, compression_level="ebook"):
+def determine_compression_level(input_pdf):
+    """
+    Determine the appropriate compression level based on the content of the PDF.
+    """
+    try:
+        reader = PdfReader(input_pdf)
+        has_text = False
+        has_images = False
+
+        for page in reader.pages:
+            text = page.extract_text()
+            if text:
+                has_text = True
+            # Check for images (if any)
+            if '/XObject' in page['/Resources']:
+                has_images = True
+
+            # If we found both text and images, we can stop checking
+            if has_text and has_images:
+                break
+
+        if has_text and not has_images:
+            return "screen"  # Soft copy
+        elif has_images:
+            return "ebook"  # Scanned copy
+        else:
+            return "screen"  # Default to screen if no text or images found
+
+    except Exception as e:
+        logger.error(f"Error determining compression level for {input_pdf}: {e}")
+        return "screen"  # Default to screen on error
+
+def compress_pdf(input_pdf, output_pdf):
     """
     Compress a single PDF using Ghostscript.
     """
+    compression_level = determine_compression_level(input_pdf)
     gs_command = [
         "gs",
         "-sDEVICE=pdfwrite",
@@ -135,7 +168,7 @@ def upload_and_compress(request):
             logger.error(f"Error during compression: {e}")
             return JsonResponse({"error": "Internal server error."}, status=500)
 
-    return render(request, 'try_now.html')
+    return render(request, 'public/compress_pdf.html')
 
 
 class FileUploadCompressAPIView(APIView):

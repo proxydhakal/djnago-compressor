@@ -1,0 +1,73 @@
+{% extends "public/partial/base.html" %} 
+{% load static %}
+{% block navbar %}
+{% include "public/partial/navbar.html" %}
+{% endblock navbar %}
+{% block main %}
+<!-- Hero Section -->
+<div class="hero">
+    <div>
+        <h1>Sanima PDF Tools</h1>
+        <p>Merge, Split, Compress, and Convert PDFs with ease!</p>
+    </div>
+</div>
+
+<!-- Features Section -->
+<div class="features">
+    <div class="feature-card">
+        <i class="fas fa-file-import"></i>
+        <h5>Merge PDFs</h5>
+        <p>Combine multiple PDF files into one.</p>
+        <a href=""><button>Start</button></a>
+    </div>
+    <div class="feature-card">
+        <i class="fas fa-file-export"></i>
+        <h5>Split PDFs</h5>
+        <p>Extract pages from your PDF document.</p>
+        <a href=""><button>Start</button></a>
+    </div>
+    <div class="feature-card">
+        <i class="fas fa-compress"></i>
+        <h5>Compress PDFs</h5>
+        <p>Reduce file size for easy sharing.</p>
+        <a href="{% url "upload_and_compress" %}"><button>Start</button></a>
+    </div>
+    <div class="feature-card">
+        <i class="fas fa-file-word"></i>
+        <h5>Word to PDF</h5>
+        <p>Convert Word documents to PDF format.</p>
+        <a href=""><button>Start</button></a>
+    </div>
+</div>
+<style>
+
+    .hero {
+        padding: 4rem 0 !important;
+        text-align: center !important;
+        background: linear-gradient(135deg, #005b31, #0057A0) !important;
+        color: white !important;
+    }
+
+    .hero h1 {
+        font-size: 2rem !important;
+        font-weight: bold !important;
+        animation: fadeInUp 2s ease-out !important;
+    }
+
+    .hero p {
+        font-size: 1rem !important;
+        margin-top: 0.5rem !important;
+        animation: fadeInUp 2s ease-out 0.5s !important;
+    }
+</style>
+{% endblock main %}
+{% block footer %}
+{% include "public/partial/footer.html" %}
+{% endblock footer %}
+{% block modal %}
+{% include "public/partial/modal.html" %}
+{% endblock modal %}
+{% block scripts %}
+{% include "public/partial/scripts.html" %}
+{% endblock scripts %}
+
