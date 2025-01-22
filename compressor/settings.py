@@ -114,7 +114,7 @@ else:
         'default': {
             'ENGINE': 'django.db.backends.postgresql',
             'NAME': os.getenv('DB_NAME_DEV'),
-            'USER': 'admin',
+            'USER': 'nmsuser',
             'PASSWORD': os.getenv('DB_PASSWORD_DEV'),
             'HOST': os.getenv('DB_HOST_DEV'),
             'PORT': os.getenv('DB_PORT_DEV'),
