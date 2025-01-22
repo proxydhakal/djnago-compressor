@@ -1,0 +1,227 @@
+html body{
+    font-family: 'Poppins', sans-serif;
+    background: linear-gradient(90deg, #005b30 18%, #007cc4);
+}
+
+.utility-header .home-bottom {
+    margin-left: 30px;
+    text-decoration: none;
+    color: #06794f;
+    font-size: 23px;
+    font-weight: 700;
+}
+
+/*utility-part-started*/
+
+.utility h1 {
+    color: #06794f;
+    font-weight: 700;
+    font-size: 32px;
+}
+
+.utility p {
+    color: #007cc4;
+    font-weight: 600;
+    font-size: 16px;
+}
+
+body {
+    background: linear-gradient(90deg, #005b30 18%, #007cc4);
+    background-repeat: no-repeat;
+    background-size: cover;
+} 
+
+.utility .utility-items .content {
+    border: 1px solid #b1bac5;
+    border-radius: 10px;
+    text-decoration: none;
+    color: #06794f;
+    font-weight: 600;
+} 
+
+.utility .content {
+  border: 1px solid #b1bac5;
+  border-radius: 10px;
+  text-decoration: none;
+  color: #224ABE;
+  font-weight: 600;
+}
+
+.utility a.content:hover i {
+  color: #06794f;
+}
+.brokerBox-subtitle{
+    text-transform: uppercase;
+}
+.utility a.content:hover .brokerBox-subtitle {
+  color: #007cc4;
+}
+
+.utility .content i {
+  color: #007cc4;
+}
+/*animation-for-border-start-here*/
+@property --angle {
+  syntax: '<angle>';
+  initial-value: 90deg;
+  inherits: true;
+}
+
+@property --gradX {
+  syntax: '<percentage>';
+  initial-value: 50%;
+  inherits: true;
+}
+
+@property --gradY {
+  syntax: '<percentage>';
+  initial-value: 0%;
+  inherits: true;
+}
+
+:root {
+  --d: 2500ms;
+  --angle: 90deg;
+  --gradX: 100%;
+  --gradY: 50%;
+  --c1: #06794f;
+  --c2: #007cc4;
+}
+
+.utility .content:hover {
+  border: 3px solid;
+  border-image: conic-gradient(from var(--angle), var(--c2), var(--c1) 0.1turn, var(--c1) 0.15turn, var(--c2) 0.25turn) 30;
+  animation: borderRotate var(--d) linear infinite forwards;
+}
+
+@keyframes borderRotate {
+  100% {
+    --angle: 420deg;
+  }
+}
+
+@keyframes borderRadial {
+  20% {
+    --gradX: 100%;
+    --gradY: 50%;
+  }
+  40% {
+    --gradX: 100%;
+    --gradY: 100%;
+  }
+  60% {
+    --gradX: 50%;
+    --gradY: 100%;
+  }
+  80% {
+    --gradX: 0%;
+    --gradY: 50%;
+  }
+  100% {
+    --gradX: 50%;
+    --gradY: 0%;
+  }
+}
+/*animation-for-border-end-here*/
+/*utility-part-ended*/
+.row {
+    display: flex;
+    justify-content: center;
+    }
+
+    .test {
+        border: 1px solid #b1bac5;
+    border-radius: 10px;
+    text-decoration: none;
+    color: #06794f;
+    font-weight: 600;
+    width: fit-content;
+    background-color: #ffffff;
+    box-shadow: 0 2px 2px 0 rgba(0,0,0,0.2), 0 6px 10px 0 rgba(0,0,0,0.3);
+    }
+
+    .test button {
+    background-color: #007cc4;
+        color: #06794f;
+        font-weight: 700;
+    }
+
+    .test .form-group label {
+    color: #06794f;
+        font-size: 23px;
+        font-weight: 700;
+    }
+
+    #id_folder_path {
+    width: 100%;
+    }
+
+    #id_folder_path:focus-visible {
+    outline: none;
+    }
+	.test {
+		border: 1px solid #b1bac5;
+	    border-radius: 10px;
+    	text-decoration: none;
+    	color: #06794f;
+    	font-weight: 600;
+    	width: fit-content;
+	    background-color: #ffffff;
+    	box-shadow: 0 2px 2px 0 rgba(0,0,0,0.2), 0 6px 10px 0 rgba(0,0,0,0.3);
+	}
+
+	.test a {
+		color: #06794f;
+		margin-bottom: 5px;
+	}
+
+	.test a i {
+		color: #ffffff;
+	}
+
+	.test .form-group label {
+    	color: #06794f;
+		font-size: 23px;
+		font-weight: 700;
+	}
+  label{
+    display: inline-block;
+    margin-bottom: .5rem;
+}
+.form-group {
+    margin-bottom: 1rem;
+}
+.custom_select {
+    position: relative;
+    display: block;
+    overflow: hidden;
+}
+.title-with-sorting .sorting .form-control{
+    min-width: 200px;
+    font-size: .8375rem;
+    height: 42px;
+    border-radius: 2px;
+    border: 2px solid #dfe2e4;
+}
+.search-form .form-group input {
+  padding-right: 50px;
+  font-size: 14px;
+} 
+.input-group-text {
+  display: flex;
+  align-items: center;
+  padding: 0.375rem 0.75rem;
+  font-size: 2rem !important;
+  font-weight: 400;
+  line-height: 1.5;
+  color: #212529;
+  text-align: center;
+  white-space: nowrap;
+  background-color: #e9ecef;
+  border: 1px solid #ced4da;
+  border-radius: 0.25rem;
+}
+.navbar-toggler-icon{
+ background-color: #224ABE !important;
+}
+

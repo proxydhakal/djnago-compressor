@@ -1,0 +1,223 @@
+{% extends "core/dashboard/base.html" %} 
+{% load static %}
+{% block main %}
+<main>
+    <header class="page-header page-header-dark bg-gradient-primary-to-secondary pb-10">
+        <div class="container-xl px-4">
+            <div class="page-header-content pt-4">
+                <div class="row align-items-center justify-content-between">
+                    <div class="col-auto mt-4">
+                        <h1 class="page-header-title">
+                            ADD DEVICE TYPE
+                        </h1>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+    <div class="container-xl px-4 mt-n10">
+        <div class="row">
+            <div class="col-lg-12">
+                <!-- Default Bootstrap Form Controls-->
+                <div id="default">
+                    <div class="card mb-4">
+                        <div class="card-header">Create Records</div>
+                        <div class="card-body">
+                            <!-- Component Preview-->
+                            <div class="sbp-preview">
+                                <div class="sbp-preview-content">
+                                    <form action="{% url "add_device" %}" method="POST" >
+                                         {% csrf_token %}
+                                        <div class="row">
+                                            <div class="col-md-4 mb-4">
+                                                <label class="form-label">Branch<b class="text-danger"> *</b></label>
+                                                <select class="form-select {% if form.branch_id.errors %}is-invalid{% endif %}" id="branch_id" name="branch_id">
+                                                    <option value="">Select Branch</option>
+                                                    {% for branch in branch_choices %}
+                                                        <option value="{{ branch.branch_id }}" {% if form.cleaned_data.branch_id == branch.branch_id %}selected{% endif %}>{{ branch.branch_name }}</option>
+                                                    {% endfor %}
+                                                </select>
+                                                {% if form.branch_id.errors %}
+                                                    <span class="text-danger">
+                                                        {% for error in form.branch_id.errors %}
+                                                            {{ error }}
+                                                        {% endfor %}
+                                                    </span>
+                                                {% endif %}
+                                            </div>
+                                            <div class="col-md-4 mb-4">
+                                                <label class="form-label">Title<b class="text-danger"> *</b></label>
+                                                <input class="form-control {% if form.title.errors %}is-invalid{% endif %}" type="text"  id="title" name="title" value="{{ form.cleaned_data.title }}" />
+                                                {% if form.title.errors %}
+                                                    <span class="text-danger">
+                                                        {% for error in form.title.errors %}
+                                                            {{ error }}
+                                                        {% endfor %}
+                                                    </span>
+                                                {% endif %}
+                                            </div>
+                                            <div class="col-md-4 mb-4">
+                                                <label class="form-label">IP Address<b class="text-danger"> *</b></label>
+                                                <input class="form-control {% if form.ip_address.errors %}is-invalid{% endif %}" type="text"  id="ip_address" name="ip_address" value="{{ form.cleaned_data.ip_address }}" />
+                                                {% if form.ip_address.errors %}
+                                                    <span class="text-danger">
+                                                        {% for error in form.ip_address.errors %}
+                                                            {{ error }}
+                                                        {% endfor %}
+                                                    </span>
+                                                {% endif %}
+                                            </div>
+                                            <div class="col-md-4 mb-4">
+                                                <label class="form-label">Device Type<b class="text-danger"> *</b></label>
+                                                <select class="form-control {% if form.device_type.errors %}is-invalid{% endif %}" id="device_type" name="device_type">
+                                                    <option value="">Select Device Type</option>
+                                                    {% for type in device_type_choices %}
+                                                        <option value="{{ type }}" {% if form.cleaned_data.device_type == type %}selected{% endif %}>{{ type }}</option>
+                                                    {% endfor %}
+                                                </select>
+                                                {% if form.device_type.errors %}
+                                                    <span class="text-danger">
+                                                        {% for error in form.device_type.errors %}
+                                                            {{ error }}
+                                                        {% endfor %}
+                                                    </span>
+                                                {% endif %}
+                                            </div>
+                                        
+                                            <div class="col-md-4 mb-4">
+                                                <label class="form-label">SOL ID<b class="text-danger"> *</b></label>
+                                                <input class="form-control {% if form.sol_id.errors %}is-invalid{% endif %}" type="text" id="sol_id" name="sol_id" value="{{ form.cleaned_data.sol_id }}" />
+                                                {% if form.sol_id.errors %}
+                                                    <span class="text-danger">
+                                                        {% for error in form.sol_id.errors %}
+                                                            {{ error }}
+                                                        {% endfor %}
+                                                    </span>
+                                                {% endif %}
+                                            </div>
+                                        
+                                            <div class="col-md-4 mb-4">
+                                                <label class="form-label">Username<b class="text-danger"> *</b></label>
+                                                <input class="form-control {% if form.username.errors %}is-invalid{% endif %}" type="text" id="username" name="username" value="{{ form.cleaned_data.username }}" />
+                                                {% if form.username.errors %}
+                                                    <span class="text-danger">
+                                                        {% for error in form.username.errors %}
+                                                            {{ error }}
+                                                        {% endfor %}
+                                                    </span>
+                                                {% endif %}
+                                            </div>
+                                        
+                                            <div class="col-md-4 mb-4">
+                                                <label class="form-label">Password <b class="text-danger">*</b></label>
+                                                <div class="input-group">
+                                                    <input class="form-control {% if form.password.errors %}is-invalid{% endif %}" 
+                                                           type="password" 
+                                                           id="password" 
+                                                           name="password" />
+                                                    <button type="button" class="btn btn-outline-primary" id="toggle-password">
+                                                        <i class="fa fa-eye" id="toggle-password-icon"></i>
+                                                    </button>
+                                                </div>
+                                                {% if form.password.errors %}
+                                                    <span class="text-danger">
+                                                        {% for error in form.password.errors %}
+                                                            {{ error }}
+                                                        {% endfor %}
+                                                    </span>
+                                                {% endif %}
+                                            </div>
+                                        
+                                            <div class="col-md-4 mb-4">
+                                                <label class="form-label">Enable Password <b class="text-danger">*</b></label>
+                                                <div class="input-group">
+                                                    <input class="form-control {% if form.enable_password.errors %}is-invalid{% endif %}" 
+                                                           type="password" 
+                                                           id="enable_password" 
+                                                           name="enable_password" />
+                                                    <button type="button" class="btn btn-outline-primary" id="toggle-enable-password">
+                                                        <i class="fa fa-eye" id="toggle-enable-password-icon"></i>
+                                                    </button>
+                                                </div>
+                                                {% if form.enable_password.errors %}
+                                                    <span class="text-danger">
+                                                        {% for error in form.enable_password.errors %}
+                                                            {{ error }}
+                                                        {% endfor %}
+                                                    </span>
+                                                {% endif %}
+                                            </div>
+
+                                            <div class="col-md-4 mb-4">
+                                                <label class="form-label">Grafana Dashboard URL</label>
+                                                <input class="form-control {% if form.grafana_dashboard_url.errors %}is-invalid{% endif %}" type="text" id="grafana_dashboard_url" name="grafana_dashboard_url" value="{{ form.cleaned_data.grafana_dashboard_url }}" />
+                                                {% if form.grafana_dashboard_url.errors %}
+                                                    <span class="text-danger">
+                                                        {% for error in form.grafana_dashboard_url.errors %}
+                                                            {{ error }}
+                                                        {% endfor %}
+                                                    </span>
+                                                {% endif %}
+                                            </div>
+                                            <div class="col-md-8 mb-4">
+                                                <label class="form-label">Description</label>
+                                                <textarea class="form-control {% if form.description.errors %}is-invalid{% endif %}" id="description" rows="4" cols="50" name="description">{{ form.cleaned_data.description }}</textarea>
+                                                {% if form.description.errors %}
+                                                    <span class="text-danger">
+                                                        {% for error in form.description.errors %}
+                                                            {{ error }}
+                                                        {% endfor %}
+                                                    </span>
+                                                {% endif %}
+                                            </div>
+                                        </div>                                        
+                                        <div class="form-group text-center">
+                                            <hr class="sidebar-divider">
+                                            <button class="btn btn-secondary" type="submit">Submit</button>
+                                            <a href="{% url "add_device" %}" class="btn btn-danger submit_anchor">Reset</a>
+                                            <a href="{% url "view_device_branch" %}" class="btn btn-secondary submit_anchor">Back</a>
+                                            <hr class="sidebar-divider">
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+<script>
+    $(document).ready(function() {
+        $('input, select, textarea').removeAttr('required');
+    });    
+</script>
+<script>
+    function togglePasswordVisibility(fieldId, iconId) {
+        const passwordField = document.getElementById(fieldId);
+        const toggleIcon = document.getElementById(iconId);
+        const isPassword = passwordField.getAttribute('type') === 'password';
+        passwordField.setAttribute('type', isPassword ? 'text' : 'password');
+        toggleIcon.classList.toggle('fa-eye');
+        toggleIcon.classList.toggle('fa-eye-slash');
+    }
+
+    document.getElementById('toggle-password').addEventListener('click', function() {
+        togglePasswordVisibility('password', 'toggle-password-icon');
+    });
+
+    document.getElementById('toggle-enable-password').addEventListener('click', function() {
+        togglePasswordVisibility('enable_password', 'toggle-enable-password-icon');
+    });
+</script>
+<script>
+    (function($) {
+        $(document).ready(function() {
+            $('.form-select').select2({
+                placeholder: "Select an option",
+            });
+        });
+    })(jQuery);
+</script>
+{% endblock main %}

@@ -55,9 +55,15 @@ INSTALLED_APPS = [
 
     #CUSTOM APPS
     'apps.compressor_app',
+    'apps.accounts',
+    'apps.core',
 
     #THIRD PARTY
     'corsheaders',
+    'allauth',
+    'allauth.account',
+    'simple_history',
+    'import_export',
 
 ]
 
@@ -70,6 +76,9 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'corsheaders.middleware.CorsMiddleware',  # Add this line
+    "allauth.account.middleware.AccountMiddleware",
+    'simple_history.middleware.HistoryRequestMiddleware',
+    'apps.accounts.middleware.RedirectLoginMiddleware',
 
 ]
 
@@ -93,7 +102,17 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'compressor.wsgi.application'
 
+AUTHENTICATION_BACKENDS = [
+    'django.contrib.auth.backends.ModelBackend',
+    'allauth.account.auth_backends.AuthenticationBackend',
+]
 
+ACCOUNT_ADAPTER = 'apps.accounts.account_adapter.NoNewUsersAccountAdapter'
+from import_export.formats.base_formats import CSV, XLSX
+IMPORT_FORMATS = [CSV, XLSX]
+EXPORT_FORMATS = [XLSX]
+
+AUTH_USER_MODEL = 'accounts.UserAccount' 
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
@@ -204,7 +223,8 @@ CORS_ALLOW_ALL_ORIGINS = True  # Allow all domains (use with caution)
 # OR allow specific origins
 CORS_ALLOWED_ORIGINS = [
     "http://localhost",
-    "http://192.168.1.76",
+    "http://192.168.29.8",
+    "http://uatnms.sanimabank.com",
 ]
 
 CORS_ALLOW_CREDENTIALS = True
@@ -228,3 +248,10 @@ REST_FRAMEWORK = {
         'rest_framework.renderers.JSONRenderer',
     ],
 }
+
+# Redirect URLs
+LOGIN_REDIRECT_URL = '/'  
+LOGOUT_REDIRECT_URL = '/' 
+
+# Optional: Set the login URL
+LOGIN_URL = '/'  

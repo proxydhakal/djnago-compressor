@@ -1,0 +1,213 @@
+{% extends "core/dashboard/base.html" %} 
+{% load static %}
+{% block main %}
+<main>
+    <header class="page-header page-header-compact page-header-light border-bottom bg-white mb-4">
+        <div class="container-xl px-4">
+            <div class="page-header-content">
+                <div class="row align-items-center justify-content-between pt-3">
+                    <div class="col-auto mb-3">
+                        <h1 class="page-header-title">
+                            <div class="page-header-icon"><i data-feather="file"></i></div>
+                            VLAN CHANGE
+                        </h1>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+    <!-- Main page content-->
+    <div class="container-xl px-4">
+        <div class="card">
+            <div class="card-header">Create Vlan Change Request</div>
+            <div class="card-body">
+                <form id="myForm" >
+                    <div class="row p-3">
+                        <div class="col-md-3 mb-4">
+                            <label class="form-label">Location<b class="text-danger"> *</b></label>
+                            <select class="form-control" id="locationSelect" aria-label="Select option" name="location" >
+                                <option value="" disabled selected>Select an option</option>
+                                <option value="Head Office">Head Office</option>
+                                <option value="Pinglasthan">Pinglasthan</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3 mb-4">
+                            <label class="form-label">Floor<b class="text-danger"> *</b></label>
+                            <select class="form-control" id="floorSelect" aria-label="Select option" name="floor" >
+                                <option value="" disabled selected>Select an option</option>
+                                <option value="1">First Floor</option>
+                                <option value="2">Second Floor</option>
+                                <option value="3">Third Floor</option>
+                                <option value="0">HR Building</option>
+                                <option value="4">Forth Floor</option>
+                                <option value="5">Fifth Floor</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3 mb-4">
+                            <label class="form-label">Mac Address<b class="text-danger"> *</b></label>
+                            <input class="form-control" type="text"  id="mac_address" name="mac_address" id="mac_address" placeholder="Enter Mac"  />
+                        </div>
+                        <div class="col-md-3 mb-4">
+                            <label class="form-label">IP Address<b class="text-danger"> *</b></label>
+                            <input class="form-control" type="text"  id="ip_address" name="ip_address" id="ip_address" placeholder="Enter Ip"  />
+                        </div>
+                        <div class="form-group text-center">
+                            <hr class="sidebar-divider">
+                            <button class="btn btn-secondary" type="submit">Submit</button>
+                            <a href="{% url "dashboard" %}" class="btn btn-danger submit_anchor">Back</a>
+                            <hr class="sidebar-divider">
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</main>
+<script>
+(function($) {
+    $(document).ready(function() {
+        $('#myForm').submit(function(event) {
+            event.preventDefault(); 
+            $('.error-message').remove(); 
+            $('.form-control').removeClass('is-invalid'); 
+
+            var isValid = true;
+
+            var macAddress = $('#mac_address').val();
+            if (!macAddress) {
+                isValid = false;
+                $('#mac_address').addClass('is-invalid'); 
+                $('#mac_address').after('<span class="error-message text-danger">Mac Address is required.</span>');
+            }
+
+            var ipAddress = $('#ip_address').val();
+            if (!ipAddress) {
+                isValid = false;
+                $('#ip_address').addClass('is-invalid'); 
+                $('#ip_address').after('<span class="error-message text-danger">IP Address is required.</span>');
+            }
+
+            var floor = $('#floorSelect').val();
+            if (!floor) {
+                isValid = false;
+                $('#floorSelect').addClass('is-invalid'); 
+                $('#floorSelect').after('<span class="error-message text-danger">Floor selection is required.</span>');
+            }
+
+            var location = $('#locationSelect').val();
+            if (!location) {
+                isValid = false;
+                $('#locationSelect').addClass('is-invalid'); 
+                $('#locationSelect').after('<span class="error-message text-danger">Location selection is required.</span>');
+            }
+
+            if (!isValid) {
+                return; 
+            }
+
+            var formData = {
+                'mac_address': macAddress,
+                'ip_address': ipAddress,
+                'floor': floor,
+                'location': location
+            };
+            
+            var csrftoken = getCookie('csrftoken');
+            
+            $.ajax({
+                url: '/vlan/change/request/',
+                method: 'POST',
+                data: formData,
+                headers: {
+                    'X-CSRFToken': csrftoken
+                },
+                beforeSend: function() {
+                    showSpinner();
+                },
+                success: function(data) {
+                    hideSpinner();
+                    if (data.result === "success") {
+                        toastr.success(data.message);
+                        $('#myForm')[0].reset();
+                    } else {
+                        toastr.error(data.message);
+                    }
+                },
+                error: function(xhr, status, error) {
+                    console.log('Error:', xhr.responseText);
+                    hideSpinner();
+                    toastr.error('An error occurred while submitting the form.');
+                }
+            });
+        });
+    
+        function getCookie(name) {
+            var cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                var cookies = document.cookie.split(';');
+                for (var i = 0; i < cookies.length; i++) {
+                    var cookie = jQuery.trim(cookies[i]);
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+    
+        function showSpinner() {
+            $('#spinner').show();
+        }
+    
+        function hideSpinner() {
+            $('#spinner').hide();
+        }
+    });
+})(jQuery);
+</script>
+<script>
+(function($) {
+    $(document).ready(function() {
+        var locationSelect = $('#locationSelect');
+        var floorSelect = $('#floorSelect');
+    
+        function updateFloorOptions(location) {
+            const floorOptions = {
+                "Head Office": ["1", "2", "3", "4", "5", "0"],
+                "Pinglasthan": ["4", "5"]
+            };
+        
+            floorSelect.empty(); 
+            const selectedLocation = location || locationSelect.val();
+            
+            if (selectedLocation && floorOptions[selectedLocation]) {
+                floorOptions[selectedLocation].forEach(option => {
+                    const $option = $('<option>', { value: option });
+                    if (selectedLocation === "Head Office" && option === "0") {
+                        $option.text("Floor HR");
+                    } else {
+                        $option.text(`Floor ${option}`);
+                    }
+                    floorSelect.append($option);
+                });
+            } else {
+                $('<option>', { value: '', text: 'Select an option' }).appendTo(floorSelect);
+            }
+        }
+        updateFloorOptions();
+
+        locationSelect.on('change', function() {
+            var location = $(this).val();
+            console.log("Location changed to:", location);
+            
+            updateFloorOptions(location);
+        });
+    
+        if(locationSelect.find(':selected').length > 0) {
+            locationSelect.trigger('change');
+        }
+    });
+})(jQuery);
+</script>
+{% endblock main %}

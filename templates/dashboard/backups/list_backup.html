@@ -1,0 +1,217 @@
+{% extends "core/dashboard/base.html" %} 
+{% load static %}
+{% block main %}
+<main>
+    <header class="page-header page-header-compact page-header-light border-bottom bg-white mb-4">
+        <div class="container-xl px-4">
+            <div class="page-header-content">
+                <div class="row align-items-center justify-content-between pt-3">
+                    <div class="col-auto mb-3">
+                        <h1 class="page-header-title">
+                            <div class="page-header-icon"><i data-feather="file"></i></div>
+                            Device Backup Log File
+                        </h1>
+                    </div>
+                    <div class="col-12 col-xl-auto mb-3">
+                        <button class="btn btn-sm btn-light text-primary active me-2">Today</button>
+                        <button class="btn btn-sm btn-light text-primary me-2">Month</button>
+                        <button class="btn btn-sm btn-light text-primary">Year</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+    <!-- Main page content-->
+    <div class="container-xl px-4">
+        <div class="card mb-5">
+            <div class="card-header">Backup Logs</div>
+            <div class="card-body mb-5">
+                <div class="mb-3">
+                    <input type="text" id="searchInput" class="form-control" placeholder="Search for log files..." value="{{ search }}">
+                </div>
+                <ul class="list-group" id="logList">
+                    {% for file in txt_files %}
+                        <li class="list-group-item">
+                            <a class="btn btn-primary" id="logLink_{{ forloop.counter }}" onclick="displayLogContents('{{ file }}')" data-bs-toggle="collapse" href="#collapseExample" role="button" aria-expanded="false" aria-controls="collapseExample">
+                                {{ file }}
+                            </a>
+
+                            <a class="btn btn-secondary" id="logDownload_{{ forloop.counter }}" href="#" onclick="downloadLog('{{ file }}')">Download</a>
+                        </li>
+                    {% endfor %}
+                </ul>
+            </div>
+            <div class="collapse p-3" id="collapseExample">
+                <div id="log-content" class="card-body mb-5">
+                    
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+<style>
+    #log-content {
+        height: 300px;
+        overflow-y: auto;
+        border: 1px solid #ccc;
+        padding: 10px;
+        box-sizing: border-box;
+    }
+    .card-footer {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 5px;
+      }
+</style>
+<script>
+    function displayLogContents(filename) {
+        // Create a new XMLHttpRequest object
+        var xhr = new XMLHttpRequest();
+        
+        // Configure it: GET-request for the URL /display-log/filename
+        xhr.open('GET', `/display-log/${filename}/`, true);
+        
+        // Set up a function to handle the response
+        xhr.onload = function() {
+            if (xhr.status >= 200 && xhr.status < 300) {
+                // Parse the JSON response
+                const data = JSON.parse(xhr.responseText);
+                const content = data.content;
+                const lines = content.split('\n');
+                let formattedContent = '';
+                
+                // Format the log content
+                lines.forEach((line, index) => {
+                    if (index === 0 || index % 5 === 0) {
+                        formattedContent += `<pre>${line}</pre>\n`;
+                    } else {
+                        formattedContent += line.replace(/\n/g, '') + ' ';
+                    }
+                });
+                
+                // Insert the formatted content into the HTML element
+                document.getElementById('log-content').innerHTML = formattedContent.trim();
+            } else {
+                console.error('Request failed with status:', xhr.status);
+            }
+        };
+    
+        // Handle network errors
+        xhr.onerror = function() {
+            console.error('Network error occurred');
+        };
+    
+        // Send the request
+        xhr.send();
+    }
+
+    function toggleLogVisibility(link) {
+        const logContent = document.getElementById('log-content');
+        const isVisible = logContent.style.display !== 'none';
+
+        if (!isVisible) {
+            link.textContent = 'Hide Logs';
+        } else {
+            link.textContent = '{{ file }}'; // Reset text
+        }
+
+        logContent.style.display = isVisible ? 'block' : 'none';
+    }
+
+    // Initial setup
+    document.addEventListener('DOMContentLoaded', () => {
+        const logLinks = document.querySelectorAll('.log-link');
+        
+        logLinks.forEach(link => {
+            link.onclick = function(e) {
+                e.preventDefault();
+                displayLogContents(this.dataset.file);
+            };
+
+            link.ondblclick = function() {
+                toggleLogVisibility(this);
+            };
+        });
+    });
+</script>
+<script>
+    document.getElementById('searchInput').addEventListener('input', function() {
+        const searchTerm = this.value;
+
+        // Make AJAX request
+        fetch(`/search_backup_logs/?search=${searchTerm}`)
+            .then(response => response.json())
+            .then(data => {
+                const logList = document.getElementById('logList');
+                logList.innerHTML = ''; // Clear current list
+
+                // Populate the list with search results
+                data.forEach((file, index) => {
+                    const listItem = document.createElement('li');
+                    listItem.className = 'list-group-item';
+
+                    const logLink = document.createElement('a');
+                    logLink.className = 'btn btn-primary';
+                    logLink.innerText = file;
+
+                    // Set the attributes for the log link
+                    logLink.id = `logLink_${index + 1}`;  // Assuming for loop counter starts at 1
+                    logLink.onclick = function() {
+                        displayLogContents(file);
+                    };
+                    logLink.setAttribute('data-bs-toggle', 'collapse');
+                    logLink.setAttribute('href', '#collapseExample');
+                    logLink.setAttribute('role', 'button');
+                    logLink.setAttribute('aria-expanded', 'false');
+                    logLink.setAttribute('aria-controls', 'collapseExample');
+
+                    listItem.appendChild(logLink);
+
+                    // Add a span for spacing
+                    const spaceSpan = document.createElement('span');
+                    spaceSpan.style.margin = '0 3px'; // Adjust the margin as needed
+                    listItem.appendChild(spaceSpan);
+
+                    const downloadLink = document.createElement('a');
+                    downloadLink.className = 'btn btn-secondary';
+                    downloadLink.innerText = 'Download';
+                    downloadLink.onclick = function() {
+                        downloadLog(file);
+                    };
+                    listItem.appendChild(downloadLink);
+
+                    logList.appendChild(listItem);
+                });
+            })
+            .catch(error => console.error('Error fetching log files:', error));
+    });
+</script>
+<script>
+    function downloadLog(filename) {
+        // Make an AJAX request to the download view
+        $.ajax({
+            url: '/download-log/' + encodeURIComponent(filename) + '/', // URL to your download view
+            method: 'GET',
+            xhrFields: {
+                responseType: 'blob' // Set the response type to blob for file download
+            },
+            success: function(data) {
+                // Create a URL for the blob and trigger a download
+                var url = window.URL.createObjectURL(data);
+                var a = document.createElement('a');
+                a.href = url;
+                a.download = filename; // Set the filename for download
+                document.body.appendChild(a);
+                a.click(); // Trigger the download
+                a.remove(); // Clean up
+                window.URL.revokeObjectURL(url); // Release the blob URL
+            },
+            error: function(xhr, status, error) {
+                console.error('Download failed:', error);
+                alert('An error occurred while downloading the file.');
+            }
+        });
+    }
+</script>
+{% endblock main %}

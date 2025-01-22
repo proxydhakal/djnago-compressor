@@ -1,0 +1,93 @@
+{% extends "core/dashboard/base.html" %} 
+{% load static %}
+{% block main %}
+<main>
+    <header class="page-header page-header-dark bg-gradient-primary-to-secondary pb-10">
+        <div class="container-xl px-4">
+            <div class="page-header-content pt-4">
+                <div class="row align-items-center justify-content-between">
+                    <div class="col-auto mt-4 mx-auto">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+    <!-- Main page content-->
+    <div class="container-xl px-4 mt-n10">
+        <div class="card mb-4">
+            <div class="card-header">DOWN INTERFACE LISTING</div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-striped table-hover text-nowrap display" id="datatable" width="100%" cellspacing="0">
+                        <thead>
+                            <tr>
+                                <th class="table-fixed-column">S.N</th>
+                                <th class="table-fixed-column">BRANCH</th>
+                                <th class="table-fixed-column">DATE</th>
+                                <th class="table-fixed-column">DEVICE TITLE</th>
+                                <th class="table-fixed-column">INTERFACE NAME</th>
+                                <th class="table-fixed-column">INTERFACE IP</th>
+                                <th class="table-fixed-column">STATUS</th>
+                                <th class="table-fixed-column">ACTIONS</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for interface in down_interface %}
+                                <tr>
+                                    <td>{{ forloop.counter }}</td>  <!-- Serial number -->
+                                    {% for branches in branch_choices %}
+                                        {% if branches.branch_id == interface.branch %}
+                                            <td>{{ branches.branch_name }}</td>  
+                                        {% endif %}
+                                    {% endfor %}
+                                    <td>{{ interface.date }} {{interface.branch}}</td>
+                                    <td>{{ interface.device_title}}</td>
+                                    <td>{{ interface.interface_name}}</td>
+                                    <td>{{ interface.ip_address}}</td>
+                                    <td>{{ interface.status}}</td>
+                                    <td>
+                                        {% if interface.status == 'administratively down' %}
+                                        <button class="btn btn-success btn-sm" onclick="bringInterfaceUp('{{ interface.id }}')">Up</button>
+                                        {% endif %}
+                                        <a href="#"  class="btn btn-primary btn-sm">Edit</a>
+                                    </td>
+                                </tr>
+                            {% empty %}
+                                <tr>
+                                    <td colspan="8">No records found.</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                    
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+<script>
+    function bringInterfaceUp(interfaceId) {
+        $('#spinner').show();
+        $.ajax({
+            url: "{% url 'interface_up_down' %}",  
+            type: "GET",
+            data: {
+                request_id: interfaceId
+            },
+            success: function(response) {
+                toastr.success(response.message, 'Success');
+                location.reload();  
+            },
+            error: function(xhr, status, error) {
+                toastr.error(xhr.responseJSON.message, 'Error');
+            },
+            complete: function() {
+                $('#spinner').hide();
+            }
+        });
+    }
+</script>
+<script type="text/javascript">
+    new DataTable('#datatable');
+</script>
+{% endblock main %}

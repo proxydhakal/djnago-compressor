@@ -1,0 +1,97 @@
+{% extends "core/dashboard/base.html" %} 
+{% load static %}
+{% block main %}
+<main>
+    <header class="page-header page-header-dark bg-gradient-primary-to-secondary pb-10">
+        <div class="container-xl px-4">
+            <div class="page-header-content pt-4">
+                <div class="row align-items-center justify-content-between">
+                    <div class="col-auto mt-4 mx-auto">
+                        <h1 class="page-header-title text-center">
+                            {% if perms.monitor.add_bandwidthmonitoring %}
+                            <a href="{% url "bandwidth_monitoring_add" %}" title="ADD NEW RECORDS" style="color: white;" class="btn bg-warning m-1" id=""/><i class="fa-solid fa-circle-plus"></i></a>
+                            {% endif %}
+                        </h1>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+    <!-- Main page content-->
+    <div class="container-xl px-4 mt-n10">
+        <div class="card mb-4">
+            <div class="card-header">REQUEST LOG LISTING</div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-striped table-hover text-nowrap display" id="datatable" width="100%" cellspacing="0">
+                        <thead>
+                            <tr>
+                                <th class="table-fixed-column">S.N</th>
+                                <th class="table-fixed-column">BRANCH</th>
+                                <th class="table-fixed-column">REQUESTED AT</th>
+                                <th class="table-fixed-column">REQUESTED BY</th>
+                                <th class="table-fixed-column">STATUS</th>
+                                <th class="table-fixed-column">FORWARD EMAIL STATUS</th>
+                                <th class="table-fixed-column">REVERT EMAIL STATUS</th>
+                                <th class="table-fixed-column">ACTIONS</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for monitoring in bandwidth_monitorings %}
+                                <tr>
+                                    <td>{{ forloop.counter }}</td>  <!-- Serial number -->
+                                    {% for branches in branch_choices %}
+                                        {% if branches.branch_id == monitoring.branch %}
+                                            <td>{{ branches.branch_name }}</td>  <!-- Assuming branch has a branch_name field -->
+                                        {% endif %}
+                                    {% endfor %}
+                                    <td>{{ monitoring.created_at }}</td>
+                                    <td>{{ monitoring.created_by}}</td>
+                                    {% if monitoring.status == 'T' %}
+                                    <td><p class="badge bg-primary text-white rounded-pill">Active</p></td>
+                                    {% elif monitoring.status == 'F' %}
+                                        <td><p class="badge bg-danger text-white rounded-pill">Closed</p></td>
+                                    {% else %}
+                                        <td></td>
+                                    {% endif %}
+                                    {% if monitoring.forward_email_status == True %}
+                                    <td><p class="badge bg-success text-white rounded-pill">Sent</p></td>
+                                    {% elif monitoring.status == False %}
+                                        <td><p class="badge bg-danger text-white rounded-pill">Not Send</p></td>
+                                    {% else %}
+                                        <td></td>
+                                    {% endif %}
+                                    {% if monitoring.revert_email_status == True %}
+                                    <td><p class="badge bg-success text-white rounded-pill">Sent</p></td>
+                                    {% elif monitoring.revert_email_status == False %}
+                                        <td><p class="badge bg-danger text-white rounded-pill">Not Send</p></td>
+                                    {% else %}
+                                        <td></td>
+                                    {% endif %}
+                                    <td>
+                                        {% if monitoring.revert_email_status == False %}
+                                        <form action="{% url 'send_revert_emails' %}" method="post" style="display: inline;">
+                                            {% csrf_token %}
+                                            <input  type="hidden"  id="request_id" name="request_id" value="{{  monitoring.id }}" />
+                                            <button type="submit" class="btn btn-primary btn-sm">Send Revert Mail</button>
+                                        </form>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                            {% empty %}
+                                <tr>
+                                    <td colspan="7">No records found.</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                    
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+<script type="text/javascript">
+    new DataTable('#datatable');
+</script>
+{% endblock main %}

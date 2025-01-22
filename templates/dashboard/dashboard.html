@@ -1,0 +1,247 @@
+{% extends "core/dashboard/base.html" %} 
+{% load static %}
+{% block main %}
+<main>
+    <!-- Main page content-->
+    <div class="container-xl px-4 mt-5">
+        <!-- Custom page header alternative example-->
+        <div class="d-flex justify-content-between align-items-sm-center flex-column flex-sm-row mb-4">
+            <div class="me-4 mb-3 mb-sm-0">
+                <h1 class="mb-0">Dashboard</h1>
+                <div class="small">
+                    <span class="fw-500 text-primary" id="current-day"></span>
+                    · <span id="current-date"></span>
+                    · <span id="current-time"></span>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-xl-3 col-md-6 mb-1 p-3">
+                <!-- Dashboard info widget 1-->
+                <div class="card border-start-lg border-start-primary h-75">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center">
+                            <div class="flex-grow-1">
+                                <div class="small fw-bold text-primary mb-1">Total Switch</div>
+                                <div class="h5">{{ totalSwitch }}</div>
+                            </div>
+                            <button class="btn btn-primary btn-sm m-1">
+                                <i class="fa-solid fa-network-wired text-gray-100"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xl-3 col-md-6 mb-1 p-3">
+                <!-- Dashboard info widget 2-->
+                <div class="card border-start-lg border-start-secondary h-75">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center">
+                            <div class="flex-grow-1">
+                                <div class="small fw-bold text-secondary mb-1">Total Router</div>
+                                <div class="h5">{{ totalRouter }}</div>
+                            </div>
+                            <button class="btn btn-secondary btn-sm m-1">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" class="bi bi-router-fill" viewBox="0 0 16 16">
+                                    <path d="M5.525 3.025a3.5 3.5 0 0 1 4.95 0 .5.5 0 1 0 .707-.707 4.5 4.5 0 0 0-6.364 0 .5.5 0 0 0 .707.707"/>
+                                    <path d="M6.94 4.44a1.5 1.5 0 0 1 2.12 0 .5.5 0 0 0 .708-.708 2.5 2.5 0 0 0-3.536 0 .5.5 0 0 0 .707.707Z"/>
+                                    <path d="M2.974 2.342a.5.5 0 1 0-.948.316L3.806 8H1.5A1.5 1.5 0 0 0 0 9.5v2A1.5 1.5 0 0 0 1.5 13H2a.5.5 0 0 0 .5.5h2A.5.5 0 0 0 5 13h6a.5.5 0 0 0 .5.5h2a.5.5 0 0 0 .5-.5h.5a1.5 1.5 0 0 0 1.5-1.5v-2A1.5 1.5 0 0 0 14.5 8h-2.306l1.78-5.342a.5.5 0 1 0-.948-.316L11.14 8H4.86zM2.5 11a.5.5 0 1 1 0-1 .5.5 0 0 1 0 1m4.5-.5a.5.5 0 1 1 1 0 .5.5 0 0 1-1 0m2.5.5a.5.5 0 1 1 0-1 .5.5 0 0 1 0 1m1.5-.5a.5.5 0 1 1 1 0 .5.5 0 0 1-1 0m2 0a.5.5 0 1 1 1 0 .5.5 0 0 1-1 0"/>
+                                    <path d="M8.5 5.5a.5.5 0 1 1-1 0 .5.5 0 0 1 1 0"/>
+                                  </svg>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xl-3 col-md-6 mb-1 p-3">
+                <!-- Dashboard info widget 3-->
+                <div class="card border-start-lg border-start-success h-75">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center">
+                            <div class="flex-grow-1">
+                                <div class="small fw-bold text-success mb-1">Total Firewall</div>
+                                <div class="h5">{{ totalFirewall }}</div>
+                            </div>
+                            <button class="btn btn-success btn-sm m-1">
+                                <i class="fa-solid fa-file-shield text-gray-100"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xl-3 col-md-6 mb-1 p-3">
+                <!-- Dashboard info widget 4-->
+                <div class="card border-start-lg border-start-info h-75">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center">
+                            <div class="flex-grow-1">
+                                <div class="small fw-bold text-info mb-1">Total Device</div>
+                                <div class="h5">{{ totalDevice }}</div>
+                            </div>
+                            <button class="btn btn-info btn-sm m-1">
+                                <i class="fa-solid fa-list text-gray-100"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xl-3 col-md-6 mb-4">
+                <!-- Dashboard info widget 4-->
+                <div class="card border-start-lg border-start-danger h-75">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center">
+                            <div class="flex-grow-1">
+                                <div class="small fw-bold text-info mb-1">Total Down Interface</div>
+                                <div class="h5">{{ totalDownInterFace }}</div>
+                            </div>
+                            <a class="btn btn-danger btn-sm m-1" href="{% url "down_interface_list" %}">
+                                <i class="fa-solid fa-eye text-gray-100"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="container-xl px-4 mb-3 mx-auto">
+        <div class="row">
+            <div class="col-lg-6">
+                <!-- Pie chart example-->
+                <div class="card mb-4 h-100">
+                    <div class="card-header">Pie Chart Devices</div>
+                    <div class="card-body">
+                        <div class="chart-pie"><canvas id="myPieChart" height="100%"></canvas></div>
+                    </div>
+                   <div class="card-footer small fw-bold">Data as of: <span id="todayDate"> {{ current_datetime }} </span></div>
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <!-- Pie chart example-->
+                <div class="card mb-4 h-100">
+                    <div class="card-header">Bar Graph Devices</div>
+                    <div class="card-body">
+                        <div class="myChart"><canvas id="myChart" width="100%" height="50"></canvas></div>
+                    </div>
+                   <div class="card-footer small fw-bold">Data as of: <span id="todayDate">{{ current_datetime }}</span></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</main>
+<script src="{% static 'js/Chart.min.js' %}" ></script>
+<script id="deviceData" type="application/json">
+    {
+        "totalSwitch": {{ totalSwitch }},
+        "totalRouter": {{ totalRouter }},
+        "totalFirewall": {{ totalFirewall }},
+        "totalDevice": {{ totalDevice }}
+    }
+</script>
+<script type="text/javascript">
+// Get the data from the JSON script tag
+var deviceData = JSON.parse(document.getElementById('deviceData').textContent);
+
+// Now you can use the variables in JavaScript
+var totalSwitch = deviceData.totalSwitch;
+var totalRouter = deviceData.totalRouter;
+var totalFirewall = deviceData.totalFirewall;
+var totalDevice = deviceData.totalDevice;
+
+// Setting default Chart.js global settings
+(Chart.defaults.global.defaultFontFamily = "Metropolis"),
+'-apple-system,system-ui,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif';
+Chart.defaults.global.defaultFontColor = "#858796";
+
+// Pie Chart Example
+var ctx = document.getElementById("myPieChart");
+if (ctx) {
+    var myPieChart = new Chart(ctx, {
+        type: "doughnut",
+        data: {
+            labels: ["Total Device", "Total Switch", "Total Router", "Total Firewall"],
+            datasets: [{
+                data: [
+                    totalDevice,
+                    totalSwitch,
+                    totalRouter,
+                    totalFirewall
+                ],
+                backgroundColor: [
+                    "rgba(0, 97, 242, 1)",
+                    "rgba(0, 172, 105, 1)",
+                    "rgba(88, 0, 232, 1)",
+                    "rgba(88, 0, 232, 1)"
+                ],
+                hoverBackgroundColor: [
+                    "rgba(0, 97, 242, 0.9)",
+                    "rgba(0, 172, 105, 0.9)",
+                    "rgba(88, 0, 232, 0.9)",
+                    "rgba(88, 0, 232, 0.9)"
+                ],
+                hoverBorderColor: "rgba(234, 236, 244, 1)"
+            }]
+        },
+        options: {
+            maintainAspectRatio: false,
+            tooltips: {
+                backgroundColor: "rgb(255,255,255)",
+                bodyFontColor: "#858796",
+                borderColor: "#dddfeb",
+                borderWidth: 1,
+                xPadding: 15,
+                yPadding: 15,
+                displayColors: false,
+                caretPadding: 10
+            },
+            legend: {
+                display: false
+            },
+            cutoutPercentage: 80
+        }
+    });
+}
+
+// Bar Chart Example
+var bar = document.getElementById('myChart');
+if (bar) {
+    new Chart(bar, {
+        type: 'bar',
+        data: {
+            labels: ["Total Device", "Total Switch", "Total Router", "Total Firewall"],
+            datasets: [{
+                label: '# of Devices',
+                data: [
+                    totalDevice,
+                    totalSwitch,
+                    totalRouter,
+                    totalFirewall
+                ],
+                backgroundColor: [
+                    "rgba(0, 97, 242, 1)",
+                    "rgba(0, 172, 105, 1)",
+                    "rgba(88, 0, 232, 1)",
+                    "rgba(88, 0, 232, 1)"
+                ],
+                borderColor: [
+                    "rgba(0, 97, 242, 1)",
+                    "rgba(0, 172, 105, 1)",
+                    "rgba(88, 0, 232, 1)",
+                    "rgba(88, 0, 232, 1)"
+                ],
+                borderWidth: 1
+            }]
+        },
+        options: {
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    suggestedMin: 0
+                }
+            }
+        }
+    });
+}
+</script>
+    
+{% endblock main %}

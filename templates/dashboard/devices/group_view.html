@@ -1,0 +1,94 @@
+{% extends "core/dashboard/base.html" %} 
+{% load static %}
+{% block main %}
+<main>
+    <header class="page-header page-header-dark bg-gradient-primary-to-secondary pb-10">
+        <div class="container-xl px-4">
+            <div class="page-header-content pt-4">
+                <div class="row align-items-center justify-content-between">
+                    <div class="col-auto mt-4 mx-auto">
+                        <h1 class="page-header-title text-center">
+                            {% if perms.core.add_device %}
+                                <a href="{% url "add_device" %}" title="ADD DEVICE" style="color: white;" class="btn bg-warning m-1" id=""/><i class="fa-solid fa-circle-plus"></i></a>
+                                <a href="{% url "device_bulk_upload" %}" style="color: white;" title="ADD BULK DEVICE" class="btn bg-success" id=""/><i class="fa-solid fa-file-excel"></i></a>
+                            {% endif %}
+                        </h1>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+    <!-- Main page content-->
+    <div class="container-xl px-4 mt-n10">
+        <div class="card mb-4">
+            <div class="card-header">DEVICE LISTING</div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-striped table-hover text-nowrap display" id="datatable" width="100%" cellspacing="0">
+                        <thead>
+                            <tr>
+                                <th class="table-fixed-column">S.N</th>
+                                <th class="table-fixed-column">BRANCH</th>
+                                <th class="table-fixed-column">TOTAL DEVICE</th>
+                                <th class="table-fixed-column">ACTIONS</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for device in devices %}
+                            <tr>
+                                <td>{{ forloop.counter }}</td>
+                                <td>{{ device.branch_name }}</td>
+                                <td>{{ device.total }}</td>
+                                <td>
+                                    {% if perms.core.view_device %}
+                                    <a href="{% url 'view_device' device.branch %}" class="btn btn-secondary btn-sm">View</a>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="6">No devices found.</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>                                                                                            
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+<style>
+    table.dataTable tbody th, table.dataTable tbody td {
+        padding: 10px 0px !important;
+    }
+    #output {
+        background-color: #000;
+        color: #fff !important;
+        padding: 10px;
+        height: 300px;
+        overflow-y: auto;
+        font-family: monospace;
+    }
+
+    .form-control {
+        background-color: #000;
+        color: #fff !important;
+        font-weight: bold;
+        border: none;
+    }
+
+    .form-control:focus {
+        box-shadow: none;
+        background-color: #000;
+    }
+
+    pre {
+        margin: 0;
+        white-space: pre-wrap;
+    }
+    th, td { text-align: center !important; margin: 5px !important; }
+</style>
+<script type="text/javascript">
+    new DataTable('#datatable');
+</script>
+{% endblock main %}
