@@ -252,7 +252,7 @@ class FileUploadCompressAPIView(APIView):
                 type=openapi.TYPE_ARRAY, items=openapi.Items(type=openapi.TYPE_FILE)
             )
         ],
-        operation_description="Upload multiple files"
+        operation_description="Upload multiple files. Supported Files PDF, PNG, JPG, JPEG"
     )
     def post(self, request, *args, **kwargs):
         files = request.FILES.getlist('files')

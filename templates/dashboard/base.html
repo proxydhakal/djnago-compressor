@@ -8,8 +8,7 @@
         <meta charset="UTF-8">
         <meta name="author" content="Shekhar Dhakal">
         <meta name="system-version" content="v1.0.0">
-        <meta name="keywords" content="NMS, Network, System">
-        <meta name="description" content="NMS is a web application dedicated to network automation, offering users access to routes and switched.">
+        <meta name="keywords" content="Compressor, Software, System">
         <link rel="icon" type="image/x-icon" href="{% static 'dashboard/images/sanima-favicon.svg' %}">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <link rel="stylesheet" href="{% static 'dashboard/css/bootstrap.min.css' %}">
@@ -59,8 +58,8 @@
                         <h6 class="dropdown-header d-flex align-items-center">
                             <img class="dropdown-user-img" src="{% if request.user.profile_image and request.user.profile_image.url %}{{ request.user.profile_image.url }}{% else %}{{ request.session.profile_image }}{% endif %}" alt="Profile Image">
                             <div class="dropdown-user-details">
-                                <div class="dropdown-user-details-name">{% if request.user.full_name %}{{ request.user.full_name }}{% else %}{{ request.session.full_name }}{% endif %}</div>
-                                <div class="dropdown-user-details-email"><a href="cdn-cgi/l/email-protection.html" class="sm" >{% if request.user.email %}{{ request.user.email }}{% else %}{{ request.session.email }}{% endif %}</a></div>
+                                <div class="dropdown-user-details-name">{{ request.user.full_name }}</div>
+                                <div class="dropdown-user-details-email"><a href="#" class="sm" >{{ request.user.email }}</a></div>
                             </div>
                         </h6>
                         <div class="dropdown-divider"></div>
@@ -93,39 +92,25 @@
                                 <span class="badge bg-success-soft text-success ms-auto">2 New!</span>
                             </a>
 
-
-
-                            <div class="sidenav-menu-heading"><h5>NMS</h5></div>
+                            <div class="sidenav-menu-heading"><h5>PDF TOOLS</h5></div>
 
                             <a class="nav-link"  href="{% url "dashboard" %}">
                                 <div class="nav-link-icon"><i data-feather="activity"></i></div>
                                 DASHBOARD
                             </a>
-                            {% comment %} ROUTER SWITCH MANAGE MENU {% endcomment %}
-                            {% if perms.core.add_device or perms.core.change_device or perms.core.view_device %}
+                            {% comment %} COMPRESSION HISTORY MENU {% endcomment %}
                             <a class="nav-link collapsed" href="javascript:void(0);" data-bs-toggle="collapse" data-bs-target="#collapseDashboards1" aria-expanded="false" aria-controls="collapseDashboards">
-                                <div class="nav-link-icon"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-router-fill" viewBox="0 0 16 16">
-                                    <path d="M5.525 3.025a3.5 3.5 0 0 1 4.95 0 .5.5 0 1 0 .707-.707 4.5 4.5 0 0 0-6.364 0 .5.5 0 0 0 .707.707"/>
-                                    <path d="M6.94 4.44a1.5 1.5 0 0 1 2.12 0 .5.5 0 0 0 .708-.708 2.5 2.5 0 0 0-3.536 0 .5.5 0 0 0 .707.707Z"/>
-                                    <path d="M2.974 2.342a.5.5 0 1 0-.948.316L3.806 8H1.5A1.5 1.5 0 0 0 0 9.5v2A1.5 1.5 0 0 0 1.5 13H2a.5.5 0 0 0 .5.5h2A.5.5 0 0 0 5 13h6a.5.5 0 0 0 .5.5h2a.5.5 0 0 0 .5-.5h.5a1.5 1.5 0 0 0 1.5-1.5v-2A1.5 1.5 0 0 0 14.5 8h-2.306l1.78-5.342a.5.5 0 1 0-.948-.316L11.14 8H4.86zM2.5 11a.5.5 0 1 1 0-1 .5.5 0 0 1 0 1m4.5-.5a.5.5 0 1 1 1 0 .5.5 0 0 1-1 0m2.5.5a.5.5 0 1 1 0-1 .5.5 0 0 1 0 1m1.5-.5a.5.5 0 1 1 1 0 .5.5 0 0 1-1 0m2 0a.5.5 0 1 1 1 0 .5.5 0 0 1-1 0"/>
-                                    <path d="M8.5 5.5a.5.5 0 1 1-1 0 .5.5 0 0 1 1 0"/>
-                                  </svg></div>
-                                Devices
+                                <div class="nav-link-icon"><i class="fa fa-compress" aria-hidden="true"></i>
+                                </div>
+                                COMPRESSION HISTORY
                                 <div class="sidenav-collapse-arrow"><i class="fas fa-angle-down"></i></div>
                             </a>
                             <div class="collapse" id="collapseDashboards1" data-bs-parent="#accordionSidenav">
                                 <nav class="sidenav-menu-nested nav accordion" id="accordionSidenavPages">
-                                    {% if perms.core.add_device %}
-                                        <a class="nav-link" href="{">Manage Device</a>
-                                    {% endif %}
-                                    {% if perms.core.backup_device %}
-                                        <a class="nav-link" href="">All Device Backup</a>
-                                        <a class="nav-link" href="">View Device Backup Log</a>
-                                    {% endif %}
+                                        <a class="nav-link" href="{% url "filecompresslog_list" %}">View</a>
                                 </nav>
                             </div>
-                            {% endif %}
-                            {% comment %} ROUTER SWITCH MANAGE MENU {% endcomment %}
+                            {% comment %} COMPRESSION HISTORY MENU {% endcomment %}
                         
                         </div>
                     </div>

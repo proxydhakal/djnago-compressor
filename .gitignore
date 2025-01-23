@@ -5,5 +5,16 @@ media/input/
 media/output/
 venv/
 
-#Ignore Pychase
+staticfiles/
+
+# Ignore Python bytecode files
+*.pyc
+
+# Ignore other common files
 __pycache__/
+*.pyo
+*.pyd
+*.db
+*.sqlite3
+*.log
+*.env

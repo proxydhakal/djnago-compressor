@@ -46,6 +46,8 @@ print(f"Allowed Hosts: {ALLOWED_HOSTS}")
 # Application definition
 
 INSTALLED_APPS = [
+    "admin_interface",
+    "colorfield",
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -65,6 +67,9 @@ INSTALLED_APPS = [
     'drf_yasg',
 
 ]
+
+X_FRAME_OPTIONS = "SAMEORIGIN"
+SILENCED_SYSTEM_CHECKS = ["security.W019"]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -125,7 +130,7 @@ else:
         'default': {
             'ENGINE': 'django.db.backends.postgresql',
             'NAME': os.getenv('DB_NAME_DEV'),
-            'USER': 'admin',
+            'USER': 'nmsuser',
             'PASSWORD': os.getenv('DB_PASSWORD_DEV'),
             'HOST': os.getenv('DB_HOST_DEV'),
             'PORT': os.getenv('DB_PORT_DEV'),

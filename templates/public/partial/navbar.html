@@ -10,9 +10,15 @@
         </button>
         <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav ms-auto">
-                <li class="nav-item">
-                    <a class="nav-link btn admin-login" href="#" data-bs-toggle="modal" data-bs-target="#loginModal">Admin Login</a>
-                </li>
+                {% if user.is_authenticated %}
+                    <li class="nav-item">
+                        <a class="nav-link btn admin-logout" href="{% url 'logout' %}">Logout</a>
+                    </li>
+                {% else %}
+                    <li class="nav-item">
+                        <a class="nav-link btn admin-login" href="#" data-bs-toggle="modal" data-bs-target="#loginModal">Admin Login</a>
+                    </li>
+                {% endif %}
             </ul>
         </div>
     </div>
