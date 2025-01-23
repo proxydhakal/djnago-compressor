@@ -23,7 +23,7 @@ services:
     volumes:
       - .:/app  # Maps the entire project directory to the container's /app directory
       - ./media:/app/media  # Maps the media folder
-      - ./static:/app/staticfiles  # Maps the static folder
+      - ./staticfiles:/app/staticfiles  # Maps the static folder
       - ./nginx.conf:/etc/nginx/nginx.conf  # Custom Nginx configuration
     depends_on:
       - compressor
