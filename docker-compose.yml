@@ -15,7 +15,7 @@ services:
     environment:
       - DJANGO_SETTINGS_MODULE=compressor.settings
 
-  nginx:
+  nginx-compressor:
     image: nginx:alpine
     container_name: nginx
     ports:
