@@ -19,7 +19,7 @@ services:
     image: nginx:alpine
     container_name: nginx
     ports:
-      - "80:80"
+      - "8001:8001"
     volumes:
       - .:/app  # Maps the entire project directory to the container's /app directory
       - ./media:/app/media  # Maps the media folder
