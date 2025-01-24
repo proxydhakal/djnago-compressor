@@ -33,15 +33,13 @@ os.makedirs(OUTPUT_DIR, exist_ok=True)
 # Lock for thread-safe database operations
 db_lock = threading.Lock()
 
-
 def generate_compressed_filename(original_filename):
     """
-    Generate a unique compressed filename based on the original filename.
+    Generate a new filename with the format Shekhar-Compress_timestamp.extension
     """
-    base, ext = os.path.splitext(original_filename)
-    timestamp = datetime.now().strftime("%Y%m%d%H%M%S%f")  # Include microseconds for uniqueness
-    return f"{base}_compressed_{timestamp}{ext}"
-
+    timestamp = datetime.now().strftime('%Y%m%d%H%M%S%f')  # Include microseconds for uniqueness
+    name, extension = os.path.splitext(original_filename)
+    return f"{name}-Compress_{timestamp}{extension}"
 
 def determine_compression_level(input_pdf):
     """
@@ -66,6 +64,7 @@ def determine_compression_level(input_pdf):
                         has_images = True
                         break
 
+            # If we found both text and images, we can stop checking
             if has_text and has_images:
                 break
 
@@ -80,12 +79,12 @@ def determine_compression_level(input_pdf):
         logger.error(f"Error determining compression level for {input_pdf}: {e}")
         return "screen"  # Default to screen on error
 
-
 def compress_pdf(input_pdf, output_pdf):
     """
     Compress a single PDF using Ghostscript.
     """
     compression_level = determine_compression_level(input_pdf)
+
     gs_command = [
         "gs",
         "-sDEVICE=pdfwrite",
@@ -98,10 +97,9 @@ def compress_pdf(input_pdf, output_pdf):
     ]
     try:
         subprocess.run(gs_command, check=True)
-        logger.info(f"Compressed {input_pdf} to {output_pdf}")
+        logger.info(f"Compressed {input_pdf} to {output_pdf} using {compression_level} settings.")
     except subprocess.CalledProcessError as e:
         logger.error(f"Error compressing {input_pdf}: {e}")
-
 
 def compress_image(input_image, output_image):
     """
@@ -109,96 +107,42 @@ def compress_image(input_image, output_image):
     """
     try:
         with Image.open(input_image) as img:
+            # Save the image with reduced quality, without changing DPI or pixel dimensions
             img.save(output_image, quality=50, optimize=True)
             logger.info(f"Compressed image {input_image} to {output_image}")
     except Exception as e:
         logger.error(f"Error compressing image {input_image}: {e}")
 
-
-def is_file_corrupted(file_path):
+def compress_files_concurrently(files):
     """
-    Check if a file is corrupted or contains unsupported metadata.
-    """
-    try:
-        file_extension = file_path.split('.')[-1].lower()
-
-        if file_extension == 'pdf':
-            # Attempt to read the PDF file
-            PdfReader(file_path)
-        elif file_extension in ['jpg', 'jpeg', 'png']:
-            # Attempt to open the image
-            with Image.open(file_path) as img:
-                img.verify()
-        else:
-            logger.warning(f"Unsupported file type: {file_extension}")
-            return True
-
-        return False  # File is valid
-    except Exception as e:
-        logger.error(f"File corruption/unsupported metadata detected in {file_path}: {e}")
-        return True  # File is corrupted
-
-
-def compress_files_concurrently(file_paths):
-    """
-    Compress multiple files concurrently using threads and log the results.
+    Compress multiple files concurrently using threads.
     """
     threads = []
     output_files = []
 
-    def log_compression(file_path, output_path, original_size, compressed_size, file_type):
-        """
-        Log the compression details into FileCompressLog model.
-        """
-        try:
-            with db_lock:  # Ensure thread-safe DB operations
-                FileCompressLog.objects.create(
-                    file_name=os.path.basename(file_path),
-                    original_size=original_size,
-                    compressed_size=compressed_size,
-                    file_type=file_type,
-                    compressed_at=datetime.now()
-                )
-                logger.info(f"Logged compression for {file_path}")
-        except Exception as e:
-            logger.error(f"Error logging compression for {file_path}: {e}")
-
-    for file_path in file_paths:
-        if is_file_corrupted(file_path):
-            logger.warning(f"Skipping corrupted or unsupported file: {file_path}")
-            continue
-
-        output_filename = generate_compressed_filename(os.path.basename(file_path))
+    for file in files:
+        input_path = os.path.join(INPUT_DIR, file.name)
+        output_filename = generate_compressed_filename(file.name)
         output_path = os.path.join(OUTPUT_DIR, output_filename)
 
+        # Save uploaded file
+        try:
+            with open(input_path, 'wb') as f:
+                for chunk in file.chunks():
+                    f.write(chunk)
+            logger.info(f"File saved: {input_path}")
+        except IOError as e:
+            logger.error(f"Failed to save {file.name}: {e}")
+            continue
+
         # Determine file extension and choose the appropriate compression method
-        file_extension = os.path.splitext(file_path)[1].lower()
-        if file_extension == '.pdf':
-            thread = threading.Thread(
-                target=lambda: (
-                    compress_pdf(file_path, output_path),
-                    log_compression(
-                        file_path,
-                        output_path,
-                        os.path.getsize(file_path),
-                        os.path.getsize(output_path) if os.path.exists(output_path) else 0,
-                        "PDF"
-                    )
-                )
-            )
-        elif file_extension in ['.jpg', '.jpeg', '.png']:
-            thread = threading.Thread(
-                target=lambda: (
-                    compress_image(file_path, output_path),
-                    log_compression(
-                        file_path,
-                        output_path,
-                        os.path.getsize(file_path),
-                        os.path.getsize(output_path) if os.path.exists(output_path) else 0,
-                        "Image"
-                    )
-                )
-            )
+        file_extension = file.name.split('.')[-1].lower()
+        if file_extension in ['pdf']:
+            # Compress PDF files
+            thread = threading.Thread(target=compress_pdf, args=(input_path, output_path))
+        elif file_extension in ['jpg', 'jpeg', 'png']:
+            # Compress image files
+            thread = threading.Thread(target=compress_image, args=(input_path, output_path))
         else:
             logger.warning(f"Unsupported file type: {file_extension}")
             continue
@@ -210,11 +154,9 @@ def compress_files_concurrently(file_paths):
     for thread in threads:
         thread.start()
     for thread in threads:
-        thread.join()  # Ensure each thread completes before moving forward
+        thread.join()
 
     return output_files
-
-
 
 def upload_and_compress(request):
     """
@@ -223,24 +165,16 @@ def upload_and_compress(request):
     if request.method == "POST":
         files = request.FILES.getlist('pdfFiles[]')
 
-        uploaded_files = []
-        for file in files:
-            file_path = os.path.join(INPUT_DIR, generate_compressed_filename(file.name))
-            with open(file_path, 'wb') as f:
-                for chunk in file.chunks():
-                    f.write(chunk)
-            uploaded_files.append(file_path)
+        if not files:
+            return JsonResponse({"error": "No files provided."}, status=400)
 
-        try:
-            output_files = compress_files_concurrently(uploaded_files)
-            compressed_files = [
-                os.path.join(settings.MEDIA_URL, 'output', os.path.basename(f))
-                for f in output_files
-            ]
-            return JsonResponse({"files": compressed_files}, status=200)
-        except Exception as e:
-            logger.error(f"Error during compression: {e}")
-            return JsonResponse({"error": "Internal server error."}, status=500)
+        output_files = compress_files_concurrently(files)
+
+        compressed_files = [
+            os.path.join(settings.MEDIA_URL, 'output', os.path.basename(f))
+            for f in output_files if os.path.exists(f)
+        ]
+        return JsonResponse({"files": compressed_files}, status=200)
 
     return render(request, 'public/compress_pdf.html')
 
