@@ -39,7 +39,7 @@ def generate_compressed_filename(original_filename):
     Generate a unique compressed filename based on the original filename.
     """
     base, ext = os.path.splitext(original_filename)
-    timestamp = datetime.now().strftime("%Y%m%d%H%M%S")
+    timestamp = datetime.now().strftime("%Y%m%d%H%M%S%f")  # Include microseconds for uniqueness
     return f"{base}_compressed_{timestamp}{ext}"
 
 
@@ -56,9 +56,15 @@ def determine_compression_level(input_pdf):
             text = page.extract_text()
             if text:
                 has_text = True
+            
             # Check for images (if any)
-            if '/XObject' in page.get('/Resources', {}):
-                has_images = True
+            resources = page.get('/Resources', {})
+            if '/XObject' in resources:
+                xobjects = resources['/XObject']
+                for obj in xobjects:
+                    if xobjects[obj]['/Subtype'] == '/Image':
+                        has_images = True
+                        break
 
             if has_text and has_images:
                 break
