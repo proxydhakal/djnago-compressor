@@ -36,9 +36,11 @@ db_lock = threading.Lock()
 
 def generate_compressed_filename(original_filename):
     """
-    Return the original filename without any modifications.
+    Generate a unique compressed filename based on the original filename.
     """
-    return original_filename
+    base, ext = os.path.splitext(original_filename)
+    timestamp = datetime.now().strftime("%Y%m%d%H%M%S")
+    return f"{base}_compressed_{timestamp}{ext}"
 
 
 def determine_compression_level(input_pdf):
