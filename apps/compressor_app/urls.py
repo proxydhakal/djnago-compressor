@@ -22,7 +22,5 @@ schema_view = get_schema_view(
 urlpatterns = [
     path('compress/pdf/', upload_and_compress, name='upload_and_compress'),
     path('api/compress/', FileUploadCompressAPIView.as_view(), name='file-upload-compress'),
-   path('api/documentation/', schema_view.with_ui('swagger', cache_timeout=0), name='swagger-ui'),
-
-
+    path('api/documentation/', schema_view.with_ui('swagger', cache_timeout=0), name='swagger-ui'),
 ]
