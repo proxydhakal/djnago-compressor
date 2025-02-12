@@ -1,32 +1,59 @@
-# Use a slim Python base image
-FROM python:3-slim
+# Base builder stage for dependencies
+FROM python:3.12-slim AS builder
 
-EXPOSE 8000
-
-# Prevent Python from generating .pyc files
+# Set environment variables
 ENV PYTHONDONTWRITEBYTECODE=1
-
-# Turn off buffering for easier container logging
 ENV PYTHONUNBUFFERED=1
 
-# Install Ghostscript for PDF compression
-RUN apt-get update && \
-    apt-get install -y ghostscript && \
-    rm -rf /var/lib/apt/lists/*
+# Install system dependencies
+RUN apt-get update && apt-get install -y \
+    build-essential \
+    libpq-dev \
+    ghostscript \
+    postgresql-client \
+    && rm -rf /var/lib/apt/lists/*
 
-# Install pip requirements
-COPY requirements.txt . 
-RUN python -m pip install -r requirements.txt
-
-# Set the working directory to /app
+# Set working directory
 WORKDIR /app
 
-# Copy the application code to the container
-COPY . /app
+# Copy dependency list
+COPY requirements.txt .
 
-# Ensure the media directory is created and accessible
-RUN mkdir -p /app/media/input /app/media/output && \
-    chmod -R 775 /app/media
+# Install Python dependencies
+RUN python -m pip install --no-cache-dir --prefix=/install -r requirements.txt
 
-# Command to run the app with Gunicorn
-CMD ["gunicorn", "--bind", "0.0.0.0:8000", "compressor.wsgi"]
+# Final runtime stage
+FROM python:3.12-slim
+
+# Set environment variables
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PYTHONUNBUFFERED=1
+
+# Install necessary system dependencies
+RUN apt-get update && apt-get install -y ghostscript postgresql-client && rm -rf /var/lib/apt/lists/*
+
+# Create a user to manage static files
+RUN useradd -m static_user
+
+# Set working directory
+WORKDIR /app
+
+# Copy dependencies from builder
+COPY --from=builder /install /usr/local
+
+# Copy application files
+COPY . .
+
+# Copy the entrypoint script and set permissions
+COPY entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
+
+# Ensure proper permissions for static/media
+RUN mkdir -p /app/staticfiles /app/media && \
+    chown -R static_user:static_user /app/staticfiles /app/media
+
+# Expose application port
+EXPOSE 8000
+
+# Set entrypoint
+ENTRYPOINT ["/entrypoint.sh"]

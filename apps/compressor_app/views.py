@@ -39,7 +39,7 @@ def generate_compressed_filename(original_filename):
     """
     timestamp = datetime.now().strftime('%Y%m%d%H%M%S%f')  # Include microseconds for uniqueness
     name, extension = os.path.splitext(original_filename)
-    return f"{name}-Compress_{timestamp}{extension}"
+    return original_filename #f"{name}-Compress_{timestamp}{extension}"
 
 def determine_compression_level(input_pdf):
     """
@@ -112,23 +112,22 @@ def compress_image(input_image, output_image):
             logger.info(f"Compressed image {input_image} to {output_image}")
     except Exception as e:
         logger.error(f"Error compressing image {input_image}: {e}")
-
-def compress_files_concurrently(files):
+        
+def compress_files_sequentially(files):
     """
-    Compress multiple files concurrently using threads.
+    Compress multiple files sequentially.
     """
-    threads = []
     output_files = []
 
     for file in files:
-        input_path = os.path.join(INPUT_DIR, file.name)
+        input_path = os.path.join(INPUT_DIR, file.name)  # ✅ File object used correctly
         output_filename = generate_compressed_filename(file.name)
         output_path = os.path.join(OUTPUT_DIR, output_filename)
 
         # Save uploaded file
         try:
             with open(input_path, 'wb') as f:
-                for chunk in file.chunks():
+                for chunk in file.chunks():  # ✅ 'file' is now an InMemoryUploadedFile
                     f.write(chunk)
             logger.info(f"File saved: {input_path}")
         except IOError as e:
@@ -138,25 +137,36 @@ def compress_files_concurrently(files):
         # Determine file extension and choose the appropriate compression method
         file_extension = file.name.split('.')[-1].lower()
         if file_extension in ['pdf']:
-            # Compress PDF files
-            thread = threading.Thread(target=compress_pdf, args=(input_path, output_path))
+            compress_pdf(input_path, output_path)
         elif file_extension in ['jpg', 'jpeg', 'png']:
-            # Compress image files
-            thread = threading.Thread(target=compress_image, args=(input_path, output_path))
+            compress_image(input_path, output_path)
         else:
             logger.warning(f"Unsupported file type: {file_extension}")
             continue
 
-        threads.append(thread)
+        # Log compression details
+        try:
+            original_size = os.path.getsize(input_path)
+            compressed_size = os.path.getsize(output_path)
+            file_type = file_extension
+
+            # Create a FileCompressLog entry
+            FileCompressLog.objects.create(
+                file_name=file.name,
+                original_size=original_size,
+                compressed_size=compressed_size,
+                file_type=file_type
+            )
+
+            logger.info(f"Compression logged for {file.name}: {original_size} -> {compressed_size} bytes")
+        except Exception as e:
+            logger.error(f"Error logging compression for {file.name}: {e}")
+
         output_files.append(output_path)
 
-    # Start and join threads
-    for thread in threads:
-        thread.start()
-    for thread in threads:
-        thread.join()
-
     return output_files
+
+
 
 def upload_and_compress(request):
     """
@@ -168,7 +178,7 @@ def upload_and_compress(request):
         if not files:
             return JsonResponse({"error": "No files provided."}, status=400)
 
-        output_files = compress_files_concurrently(files)
+        output_files = compress_files_sequentially(files)
 
         compressed_files = [
             os.path.join(settings.MEDIA_URL, 'output', os.path.basename(f))
@@ -177,6 +187,7 @@ def upload_and_compress(request):
         return JsonResponse({"files": compressed_files}, status=200)
 
     return render(request, 'public/compress_pdf.html')
+
 
 from apps.compressor_app.serializers import FileUploadSerializer
 class FileUploadCompressAPIView(APIView):
@@ -198,20 +209,12 @@ class FileUploadCompressAPIView(APIView):
     )
     def post(self, request, *args, **kwargs):
         files = request.FILES.getlist('files')
-
         if not files:
             return Response({"error": "No files provided."}, status=status.HTTP_400_BAD_REQUEST)
 
-        uploaded_files = []
-        for file in files:
-            file_path = os.path.join(INPUT_DIR, generate_compressed_filename(file.name))
-            with open(file_path, 'wb') as f:
-                for chunk in file.chunks():
-                    f.write(chunk)
-            uploaded_files.append(file_path)
-
+        # Pass file objects directly instead of saving them first
         try:
-            output_files = compress_files_concurrently(uploaded_files)
+            output_files = compress_files_sequentially(files)  # ✅ Pass files instead of file paths
             compressed_files = [
                 os.path.join(settings.MEDIA_URL, 'output', os.path.basename(f))
                 for f in output_files if os.path.exists(f)
@@ -220,3 +223,4 @@ class FileUploadCompressAPIView(APIView):
         except Exception as e:
             logger.error(f"Error during compression: {e}")
             return Response({"error": "Internal server error."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+

@@ -195,6 +195,8 @@ else:
     MEDIA_URL = os.getenv('MEDIA_URL_DEV', '/media/')
     MEDIA_ROOT = os.getenv('MEDIA_ROOT_DEV', os.path.join(BASE_DIR, 'media/'))
 
+
+
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 
@@ -220,6 +222,7 @@ CORS_ALLOW_ALL_ORIGINS = True  # Allow all domains (use with caution)
 # OR allow specific origins
 CORS_ALLOWED_ORIGINS = [
     "http://localhost",
+    "http://0.0.0.0:8001",
     "http://192.168.29.8",
     "http://uatnms.sanimabank.com",
 ]
@@ -256,3 +259,9 @@ LOGOUT_REDIRECT_URL = '/'
 
 # Optional: Set the login URL
 LOGIN_URL = '/'  
+
+CSRF_TRUSTED_ORIGINS = [
+    'http://0.0.0.0:8001',  # Allow local testing
+    'https://shekhardhakal.com.np',  # Production domain
+    'https://www.shekhardhakal.com.np'
+]

@@ -16,10 +16,10 @@
     <form id="uploadForm" enctype="multipart/form-data" method="POST">
         {% csrf_token %}
         <div class="mb-3">
-            <label for="pdfFile" class="form-label">Upload PDF Files</label>
+            <label for="pdfFile" class="form-label">Upload Files....</label>
             <input id="pdfFile" name="pdfFiles[]" type="file" multiple class="file" accept=".pdf, .jpg, .jpeg, .png" multiple data-preview-file-type="any">
         </div>
-        <button type="submit" class="btn btn-primary w-100">Compress PDF</button>
+        <button type="submit" class="btn btn-primary w-100">Compress</button>
     </form>
 
     <!-- Progress Bar Section -->
