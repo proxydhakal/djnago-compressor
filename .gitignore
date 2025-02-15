@@ -1,12 +1,8 @@
 .vscode/
 .env
 env/
-media/input/
-media/output/
 venv/
-
-staticfiles/
-
+media/
 # Ignore Python bytecode files
 *.pyc
 

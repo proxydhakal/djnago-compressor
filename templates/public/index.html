@@ -18,27 +18,36 @@
         <i class="fas fa-file-import"></i>
         <h5>Merge PDFs</h5>
         <p>Combine multiple PDF files into one.</p>
-        <a href=""><button>Start</button></a>
+        <a href="{% url "merge_pdfs" %}" ><button>Start</button></a>
     </div>
     <div class="feature-card">
         <i class="fas fa-file-export"></i>
         <h5>Split PDFs</h5>
         <p>Extract pages from your PDF document.</p>
-        <a href=""><button>Start</button></a>
+        <a href="{% url "upload_pdf_split" %}" ><button>Start</button></a>
     </div>
     <div class="feature-card">
         <i class="fas fa-compress"></i>
         <h5>Compress PDFs</h5>
         <p>Reduce file size for easy sharing.</p>
-        <a href="{% url "upload_and_compress" %}"><button>Start</button></a>
+        <a href="{% url 'upload_and_compress' %}"><button>Start</button></a>
     </div>
     <div class="feature-card">
         <i class="fas fa-file-word"></i>
         <h5>Word to PDF</h5>
         <p>Convert Word documents to PDF format.</p>
-        <a href=""><button>Start</button></a>
+        <a href="{% url "upload_and_convert" %}"><button>Start</button></a>
     </div>
 </div>
+
+<!-- Popup Container -->
+<div id="popup" class="popup">
+    <div class="popup-content">
+        <h4>Features Coming Soon</h4>
+        <button class="btn btn-primary" onclick="closePopup()">OK</button>
+    </div>
+</div>
+
 <style>
 
     .hero {
@@ -60,6 +69,60 @@
         animation: fadeInUp 2s ease-out 0.5s !important;
     }
 </style>
+<!-- Styles -->
+
+<!-- Styles -->
+<style>
+    .features {
+        display: flex;
+        gap: 20px;
+    }
+    .feature-card {
+        border: 1px solid #ddd;
+        padding: 20px;
+        cursor: pointer;
+        transition: transform 0.3s ease-in-out;
+        border-radius: 10px;
+        background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+        box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+    }
+    .feature-card:hover {
+        transform: scale(1.05);
+    }
+    .popup {
+        display: none;
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background: white;
+        padding: 30px;
+        border-radius: 15px;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        text-align: center;
+        animation: fadeIn 0.3s ease-in-out;
+    }
+    .popup-content h4 {
+        margin-bottom: 15px;
+        font-weight: bold;
+        color: #000;
+    }
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translate(-50%, -55%); }
+        to { opacity: 1; transform: translate(-50%, -50%); }
+    }
+    </style>
+    
+    <!-- Script -->
+    <script>
+    function showPopup() {
+        document.getElementById("popup").style.display = "block";
+    }
+    function closePopup() {
+        document.getElementById("popup").style.display = "none";
+    }
+    </script>
+    
 {% endblock main %}
 {% block footer %}
 {% include "public/partial/footer.html" %}

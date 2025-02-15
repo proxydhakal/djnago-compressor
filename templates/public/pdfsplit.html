@@ -1,0 +1,235 @@
+{% extends "public/partial/base.html" %}
+{% load static %}
+{% block navbar %}
+{% include "public/partial/navbar.html" %}
+{% endblock navbar %}
+{% block main %}
+<!-- Hero Section -->
+<div class="hero">
+    <h1>PDF Splitter</h1>
+    <p>Upload a PDF, select pages, and get a new split PDF!</p>
+</div>
+
+<!-- Form Section -->
+<div class="form-container mt-3 mb-3 p-3">
+    <h2>Upload Your PDF File</h2>
+    <form id="uploadForm" enctype="multipart/form-data" method="POST">
+        {% csrf_token %}
+        <div class="mb-3">
+            <label for="pdfFile" class="form-label">Upload PDF File</label>
+            <input id="file" type="file" name="file" accept=".pdf" class="form-control" />
+        </div>
+        <button type="submit" class="btn btn-primary w-100">Upload</button>
+    </form>
+</div>
+
+<!-- Page Preview Section -->
+<div id="pdf-preview-container" class="container mt-5" style="display: none;">
+    <h2>PDF Preview</h2>
+    <div class="row row-cols-1 row-cols-md-4" id="pages-preview-container">
+        <!-- Pages will be added here dynamically -->
+    </div>
+</div>
+
+<!-- Page Selection Section (Hidden Initially) -->
+<div id="page-selection" class="form-container mt-3 mb-3 p-3" style="display: none;">
+    <h2>Select Pages to Split</h2>
+    <form id="splitForm" method="POST">
+        {% csrf_token %}
+        <input type="hidden" id="pdf_file_path" name="pdf_file_path" value="" />
+        <div id="pages-list"></div>
+        <button type="submit" class="btn btn-primary w-100">Split PDF</button>
+    </form>
+</div>
+
+<style>
+    .hero {
+        padding: 4rem 0 !important;
+        text-align: center !important;
+        background: linear-gradient(135deg, #005b31, #0057A0) !important;
+        color: white !important;
+    }
+    .hero h1 {
+        font-size: 2rem !important;
+        font-weight: bold !important;
+        animation: fadeInUp 2s ease-out !important;
+    }
+    .hero p {
+        font-size: 1rem !important;
+        margin-top: 0.5rem !important;
+        animation: fadeInUp 2s ease-out 0.5s !important;
+    }
+
+    /* Optional styling for the preview canvas */
+    .page-preview {
+        width: 100%;
+        height: 310px;  /* Set a fixed height for the preview */
+        border: 1px solid #ddd;
+        padding: 10px;
+        background-color: #f8f8f8;
+        box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    /* Ensure page preview fits 4 per row */
+    .row-cols-md-4 .col-md-3 {
+        flex: 1 0 25%;
+    }
+
+    /* Responsive design for smaller screens */
+    @media (max-width: 768px) {
+        .row-cols-md-4 .col-md-3 {
+            flex: 1 0 50%;  /* 2 per row on small screens */
+        }
+    }
+</style>
+
+<script src="{% static 'public/js/jquery-3.6.0.min.js' %}" ></script>
+<script src="{% static 'public/js/fileinput.min.js' %}" ></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.10.377/pdf.min.js"></script>
+
+<script>
+    $(document).ready(function () {
+        // Initialize file input
+        $("#file").fileinput({
+            theme: "fas",
+            allowedFileExtensions: ["pdf"],
+            maxFileCount: 1,
+            showRemove: true,
+            dropZoneEnabled: true,
+            showPreview: true,
+            previewFileType: "any",
+            initialCaption: "Select files to upload",
+        });
+
+        // Upload the PDF file
+        $('#uploadForm').on('submit', function (e) {
+            e.preventDefault();
+
+            var formData = new FormData(this);
+            $.ajax({
+                url: "{% url 'upload_pdf_split' %}",
+                type: "POST",
+                data: formData,
+                processData: false,
+                contentType: false,
+                success: function (response) {
+                    if (response.success) {
+                        $('#pdf_file_path').val(response.filename);  // Save the filename for later use
+                        $('#page-selection').show();  // Show page selection section
+                        $('#pdf-preview-container').show();  // Show PDF preview container
+                        $('#pages-list').empty();  // Clear any previous pages
+                        $('#pages-preview-container').empty();  // Clear any previous previews
+
+                        // Display PDF preview for each page
+                        var uploadedFile = response.filename;
+                        var fileInput = document.getElementById('file').files[0];
+
+                        const reader = new FileReader();
+                        reader.onload = function(event) {
+                            const typedArray = new Uint8Array(event.target.result);
+
+                            // Use PDF.js to load the document
+                            pdfjsLib.getDocument(typedArray).promise.then(function(pdf) {
+                                const totalPages = pdf.numPages;
+                                
+                                // Render each page preview
+                                for (let i = 1; i <= totalPages; i++) {
+                                    renderPagePreview(pdf, i);
+                                }
+
+                                // Display pages for selection
+                                response.pages.forEach(function (page) {
+                                    $('#pages-list').append(`
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" value="${page}" id="page${page}">
+                                            <label class="form-check-label" for="page${page}">
+                                                Page ${page + 1}
+                                            </label>
+                                        </div>
+                                    `);
+                                });
+                            });
+                        };
+                        reader.readAsArrayBuffer(fileInput);
+                    } else {
+                        alert('Error uploading file');
+                    }
+                },
+                error: function () {
+                    alert('Error during file upload');
+                }
+            });
+        });
+
+        // Split PDF after page selection
+        $('#splitForm').on('submit', function (e) {
+            e.preventDefault();
+
+            var selectedPages = [];
+            $('input[type="checkbox"]:checked').each(function () {
+                selectedPages.push($(this).val());
+            });
+
+            if (selectedPages.length === 0) {
+                alert('Please select at least one page.');
+                return;
+            }
+
+            var formData = {
+                selected_pages: selectedPages,
+                pdf_file_path: $('#pdf_file_path').val(),
+                csrfmiddlewaretoken: $("input[name='csrfmiddlewaretoken']").val()
+            };
+
+            $.ajax({
+                url: "{% url 'split_pdf' %}",
+                type: "POST",
+                data: formData,
+                success: function (response) {
+                    if (response.success) {
+                        window.location.href = response.pdf_url;  // Redirect to download the new PDF
+                    } else {
+                        alert('Error splitting PDF');
+                    }
+                },
+                error: function () {
+                    alert('Error during PDF splitting');
+                }
+            });
+        });
+
+        // Function to render page previews
+        function renderPagePreview(pdf, pageNum) {
+            pdf.getPage(pageNum).then(function(page) {
+                const canvas = document.createElement('canvas');
+                const context = canvas.getContext('2d');
+                const scale = 0.5;  // Scale down to fit 200x200 px
+                const viewport = page.getViewport({ scale: scale });
+
+                canvas.height = 300;
+                canvas.width = 250;
+
+                page.render({ canvasContext: context, viewport: viewport }).promise.then(function() {
+                    // After rendering, append the canvas to the preview container
+                    const previewContainer = document.getElementById('pages-preview-container');
+                    const previewElement = document.createElement('div');
+                    previewElement.classList.add('col-md-3', 'mb-4', 'page-preview');  // Use col-md-3 for 4 columns
+                    previewElement.appendChild(canvas);
+
+                    previewContainer.appendChild(previewElement);
+                });
+            });
+        }
+    });
+</script>
+
+{% endblock main %}
+{% block footer %}
+{% include "public/partial/footer.html" %}
+{% endblock footer %}
+{% block modal %}
+{% include "public/partial/modal.html" %}
+{% endblock modal %}
+{% block scripts %}
+{% include "public/partial/scripts.html" %}
+{% endblock scripts %}

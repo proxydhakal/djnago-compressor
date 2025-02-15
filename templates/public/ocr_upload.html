@@ -1,0 +1,138 @@
+{% extends "public/partial/base.html" %} 
+{% load static %}
+
+{% block navbar %}
+    {% include "public/partial/navbar.html" %}
+{% endblock navbar %}
+
+{% block main %}
+    <!-- Hero Section -->
+    <div class="hero">
+        <h1>OCR File Upload</h1>
+        <p>Upload PDF or Image files and extract text in real time!</p>
+    </div>
+
+    <!-- File Upload and Extracted Text Section -->
+    <div class="container mt-3 mb-3">
+        <div class="card">
+            <div class="card-header">
+                <h2 class="text-black text-center">Upload PDF or Image for OCR Processing</h2>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <!-- File Upload Column -->
+                    <div class="col-md-6">
+                        <input type="file" id="fileInput" class="form-control mt-3" accept=".pdf, .jpg, .jpeg, .png" data-preview-file-type="any">
+                        <button id="uploadBtn" class="btn btn-primary mt-3">Extract Text</button>
+                    </div>
+
+                    <!-- Extracted Text Column -->
+                    <div class="col-md-6">
+                        <h3 class="mt-4 text-black">Extracted Text:</h3>
+                        <div class="position-relative">
+                            <button id="copyBtn" class="btn btn-secondary btn-sm position-absolute top-0 end-0" style="display: none;">
+                                Copy Text
+                            </button>
+                            <div id="output" class="border p-3 mt-2 text-start" style="white-space: pre-wrap; max-width: 100%; color: black;">
+                                No text extracted yet.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <style>
+        .hero {
+            padding: 4rem 0;
+            text-align: center;
+            background: linear-gradient(135deg, #005b31, #0057A0);
+            color: white;
+        }
+        .hero h1 {
+            font-size: 2rem;
+            font-weight: bold;
+            animation: fadeInUp 2s ease-out;
+        }
+        .hero p {
+            font-size: 1rem;
+            margin-top: 0.5rem;
+            animation: fadeInUp 2s ease-out 0.5s;
+        }
+    </style>
+
+    <script src="{% static 'public/js/jquery-3.6.0.min.js' %}"></script>
+    <script src="{% static 'public/js/fileinput.min.js' %}" ></script>
+    <script>
+        // Initialize file input
+        $("#fileInput").fileinput({
+            theme: "fas",
+            allowedFileExtensions: ["pdf", "png", "jpg", "jpeg"],
+            maxFileCount: 5,
+            showRemove: true,
+            dropZoneEnabled: true,
+            showPreview: true,
+            previewFileType: "any",
+            initialCaption: "Select files to upload",
+        });
+    </script>
+{% endblock main %}
+
+{% block footer %}
+    {% include "public/partial/footer.html" %}
+{% endblock footer %}
+
+{% block modal %}
+    {% include "public/partial/modal.html" %}
+{% endblock modal %}
+
+{% block scripts %}
+    {% include "public/partial/scripts.html" %}
+    <script>
+        $(document).ready(function () {
+            $("#uploadBtn").click(function () {
+                var file = $("#fileInput")[0].files[0];
+                if (!file) {
+                    alert("Please select a file!");
+                    return;
+                }
+
+                var formData = new FormData();
+                formData.append("file", file);
+                formData.append("csrfmiddlewaretoken", "{{ csrf_token }}");
+
+                $("#output").text("Processing...");
+                $("#copyBtn").hide(); // Hide copy button initially
+
+                $.ajax({
+                    url: "{% url 'ocr_upload' %}",
+                    type: "POST",
+                    data: formData,
+                    processData: false,
+                    contentType: false,
+                    success: function (response) {
+                        let extractedText = response.text || "No text found.";
+                        $("#output").text(extractedText);
+
+                        if (extractedText.trim().length > 0) {
+                            $("#copyBtn").show(); // Show copy button if text is present
+                        }
+                    },
+                    error: function () {
+                        $("#output").text("Error processing file.");
+                    }
+                });
+            });
+
+            $("#copyBtn").click(function () {
+                let text = $("#output").text();
+                navigator.clipboard.writeText(text).then(function () {
+                    alert("Text copied to clipboard!");
+                }).catch(function () {
+                    alert("Failed to copy text.");
+                });
+            });
+        });
+    </script>
+{% endblock scripts %}

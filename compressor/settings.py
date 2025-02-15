@@ -57,8 +57,12 @@ INSTALLED_APPS = [
 
     #CUSTOM APPS
     'apps.compressor_app',
+    'apps.pdftodocs',
     'apps.accounts',
     'apps.core',
+    'apps.ocr',
+    'apps.pdfsplit',
+    'apps.mergepdf',
 
     #THIRD PARTY
     'corsheaders',

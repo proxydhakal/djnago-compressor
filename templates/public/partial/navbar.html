@@ -11,15 +11,18 @@
         <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav ms-auto">
                 {% if user.is_authenticated %}
-                    <li class="nav-item">
+                    <li class="nav-item ms-3">
                         <a class="nav-link btn admin-logout" href="{% url 'logout' %}">Logout</a>
                     </li>
                 {% else %}
-                    <li class="nav-item">
+                    <li class="nav-item ms-3">
                         <a class="nav-link btn admin-login" href="#" data-bs-toggle="modal" data-bs-target="#loginModal">Admin Login</a>
                     </li>
                 {% endif %}
+                <li class="nav-item ms-3">
+                    <a class="nav-link btn admin-login" href="{% url 'ocr_upload' %}">Try OCR</a>
+                </li>
             </ul>
-        </div>
+        </div>        
     </div>
 </nav>

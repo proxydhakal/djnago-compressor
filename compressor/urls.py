@@ -24,6 +24,10 @@ urlpatterns = [
     path('', include('apps.accounts.urls')),  # Include app-specific URLs
     path('', include('apps.compressor_app.urls')),  # Include app-specific URLs
     path('', include('apps.core.urls')),  # Include app-specific URLs
+    path('', include('apps.pdftodocs.urls')),  # Include app-specific URLs
+    path('', include('apps.ocr.urls')),  # Include app-specific URLs
+    path('', include('apps.pdfsplit.urls')),  # Include app-specific URLs
+    path('', include('apps.mergepdf.urls')),  # Include app-specific URLs
 ]+static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
 
 

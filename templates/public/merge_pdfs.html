@@ -1,0 +1,136 @@
+{% extends "public/partial/base.html" %}
+{% load static %}
+{% block navbar %}
+{% include "public/partial/navbar.html" %}
+{% endblock navbar %}
+{% block main %}
+<!-- Hero Section -->
+<div class="hero">
+    <h1>PDF Merger Tool</h1>
+    <p>Upload and reorder PDFs to merge them into a single file.</p>
+</div>
+
+<!-- Form Section -->
+<div class="form-container mt-3 mb-3 p-3">
+    <h2>Upload Your PDF Files</h2>
+    <form id="mergeForm" enctype="multipart/form-data" method="POST">
+        {% csrf_token %}
+        <div class="mb-3">
+            <label for="pdfFiles" class="form-label">Select PDF Files</label>
+            <input id="pdfFiles" type="file" name="pdf_files" accept=".pdf" multiple class="form-control" />
+        </div>
+        <button type="submit" class="btn btn-primary w-100">Upload and Merge</button>
+    </form>
+</div>
+
+<!-- PDF File Order Section -->
+<div id="pdf-files-container" class="container mt-5" style="display: none;">
+    <h2>Reorder Files for Merging</h2>
+    <ul id="sortable" class="list-group">
+        <!-- PDF files will be listed here -->
+    </ul>
+</div>
+
+<!-- Merged PDF Download Section -->
+<div id="download-section" class="container mt-3" style="display: none;">
+    <h2>Download Merged PDF</h2>
+    <a id="download-link" href="#" class="btn btn-success w-100" download>Download Merged PDF</a>
+</div>
+
+<style>
+    .hero {
+        padding: 4rem 0 !important;
+        text-align: center !important;
+        background: linear-gradient(135deg, #005b31, #0057A0) !important;
+        color: white !important;
+    }
+    .hero h1 {
+        font-size: 2rem !important;
+        font-weight: bold !important;
+        animation: fadeInUp 2s ease-out !important;
+    }
+    .hero p {
+        font-size: 1rem !important;
+        margin-top: 0.5rem !important;
+        animation: fadeInUp 2s ease-out 0.5s !important;
+    }
+
+    /* Optional styling for the PDF files list */
+    #sortable {
+        margin-top: 1rem;
+    }
+    #sortable .list-group-item {
+        cursor: move;
+    }
+</style>
+
+<!-- Ensure jQuery is loaded first, then jQuery UI -->
+<script src="{% static 'public/js/jquery-3.6.0.min.js' %}"></script>
+<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"></script>
+
+<script>
+    $(document).ready(function () {
+
+        $("#pdfFiles").fileinput({
+            theme: "fas",
+            allowedFileExtensions: ["pdf"],
+            maxFileCount: 5,
+            showRemove: true,
+            dropZoneEnabled: true,
+            showPreview: true,
+            previewFileType: "any",
+            initialCaption: "Select files to upload",
+        });
+        // Enable sorting functionality for the PDF files list
+        $('#sortable').sortable();
+
+        // Handle file upload and display
+        $('#mergeForm').on('submit', function (e) {
+            e.preventDefault();
+
+            var formData = new FormData(this);
+            $.ajax({
+                url: "{% url 'merge_pdfs' %}",
+                type: "POST",
+                data: formData,
+                processData: false,
+                contentType: false,
+                success: function (response) {
+                    if (response.success) {
+                        $('#pdf-files-container').hide();  // Hide the file order section
+                        $('#download-section').show();  // Show the download section
+                        $('#download-link').attr('href', response.merged_pdf_url);
+                    } else {
+                        alert('Error during file merge.');
+                    }
+                },
+                error: function () {
+                    alert('Error during file upload.');
+                }
+            });
+        });
+
+        // Show files to reorder after uploading
+        $('#pdfFiles').on('change', function () {
+            var files = this.files;
+            $('#sortable').empty();
+
+            for (var i = 0; i < files.length; i++) {
+                var listItem = $('<li>').addClass('list-group-item').text(files[i].name);
+                $('#sortable').append(listItem);
+            }
+
+            $('#pdf-files-container').show();  // Show the reorder section
+        });
+    });
+</script>
+{% endblock main %}
+{% block footer %}
+{% include "public/partial/footer.html" %}
+{% endblock footer %}
+{% block modal %}
+{% include "public/partial/modal.html" %}
+{% endblock modal %}
+{% block scripts %}
+{% include "public/partial/scripts.html" %}
+{% endblock scripts %}

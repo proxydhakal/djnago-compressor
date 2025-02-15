@@ -1,0 +1,72 @@
+{% extends "public/partial/base.html" %} 
+{% load static %}
+{% block navbar %}
+{% include "public/partial/navbar.html" %}
+{% endblock navbar %}
+{% block main %}
+<!-- Hero Section -->
+<div class="hero">
+    <h1>Try Word file Convertor</h1>
+    <p>Upload your DCCX files and convert them with ease!</p>
+</div>
+
+<!-- Form Section -->
+<div class="form-container mt-3 mb-3 p-3">
+    <h2>Convert DOCX to PDF</h2>
+    <form id="uploadForm" enctype="multipart/form-data" method="POST">
+        {% csrf_token %}
+        <div class="mb-3">
+            <label for="pdfFile" class="form-label">Upload Files....</label>
+            <input id="files" type="file" name="files[]" multiple accept=".docx" multiple data-preview-file-type="any">
+        </div>
+        <button type="submit" class="btn btn-primary w-100">Compress</button>
+    </form>
+</div>
+<style>
+    .hero {
+        padding: 4rem 0 !important;
+        text-align: center !important;
+        background: linear-gradient(135deg, #005b31, #0057A0) !important;
+        color: white !important;
+    }
+
+    .hero h1 {
+        font-size: 2rem !important;
+        font-weight: bold !important;
+        animation: fadeInUp 2s ease-out !important;
+    }
+
+    .hero p {
+        font-size: 1rem !important;
+        margin-top: 0.5rem !important;
+        animation: fadeInUp 2s ease-out 0.5s !important;
+    }
+</style>
+<script src="{% static 'public/js/jquery-3.6.0.min.js' %}" ></script>
+<script>
+    $(document).ready(function () {
+        // Initialize file input
+        $("#files").fileinput({
+            theme: "fas",
+            allowedFileExtensions: ["doc", "docx"],
+            maxFileCount: 5,
+            showRemove: true,
+            dropZoneEnabled: true,
+            showPreview: true,
+            previewFileType: "any",
+            initialCaption: "Select files to upload",
+        });
+
+    });
+</script>
+{% endblock main %}
+{% block footer %}
+{% include "public/partial/footer.html" %}
+{% endblock footer %}
+{% block modal %}
+{% include "public/partial/modal.html" %}
+{% endblock modal %}
+{% block scripts %}
+{% include "public/partial/scripts.html" %}
+{% endblock scripts %}
+

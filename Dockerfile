@@ -11,6 +11,11 @@ RUN apt-get update && apt-get install -y \
     libpq-dev \
     ghostscript \
     postgresql-client \
+    libreoffice \
+    libreoffice-script-provider-python \
+    tesseract-ocr \
+    libgl1 \
+    libglib2.0-0 \
     && rm -rf /var/lib/apt/lists/*
 
 # Set working directory
@@ -30,7 +35,15 @@ ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
 
 # Install necessary system dependencies
-RUN apt-get update && apt-get install -y ghostscript postgresql-client && rm -rf /var/lib/apt/lists/*
+RUN apt-get update && apt-get install -y \
+    ghostscript \
+    postgresql-client \
+    libreoffice \
+    libreoffice-script-provider-python \
+    tesseract-ocr \
+    libgl1 \
+    libglib2.0-0 \
+    && rm -rf /var/lib/apt/lists/*
 
 # Create a user to manage static files
 RUN useradd -m static_user

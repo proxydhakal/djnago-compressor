@@ -223,4 +223,3 @@ class FileUploadCompressAPIView(APIView):
         except Exception as e:
             logger.error(f"Error during compression: {e}")
             return Response({"error": "Internal server error."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
