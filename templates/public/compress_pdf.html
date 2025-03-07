@@ -19,17 +19,31 @@
             <label for="pdfFile" class="form-label">Upload Files....</label>
             <input id="pdfFile" name="pdfFiles[]" type="file" multiple class="file" accept=".pdf, .jpg, .jpeg, .png" multiple data-preview-file-type="any">
         </div>
+
+        <!-- Compression Level Selection -->
+        <div class="mb-3">
+            <label for="compressionLevel" class="form-label">Select Compression Level</label>
+            <select id="compressionLevel" name="compression_level" class="form-select">
+                <option value="screen">Screen (Lowest Quality)</option>
+                <option value="ebook">Ebook (Medium Quality)</option>
+                <option value="printer">Printer (High Quality)</option>
+                <option value="prepress">Prepress (Very High Quality)</option>
+                <option value="default">Default</option>
+            </select>
+        </div>
+
         <button type="submit" class="btn btn-primary w-100">Compress</button>
     </form>
 
     <!-- Progress Bar Section -->
-    <div class="progress-container">
+    <div class="progress-container" style="display: none;">
         <p>Compressing your PDFs... Please wait!</p>
         <div class="progress">
             <div id="progressBar" class="progress-bar"></div>
         </div>
     </div>
 </div>
+
 <style>
     .hero {
         padding: 4rem 0 !important;
@@ -50,6 +64,7 @@
         animation: fadeInUp 2s ease-out 0.5s !important;
     }
 </style>
+
 <script src="{% static 'public/js/jquery-3.6.0.min.js' %}" ></script>
 <script>
     $(document).ready(function () {
@@ -86,6 +101,8 @@
             $("#progressBar").css("width", "0%");
 
             const formData = new FormData(this);
+            const compressionLevel = $("#compressionLevel").val();
+            formData.append("compression_level", compressionLevel);
 
             // AJAX request to the backend
             $.ajax({
@@ -128,6 +145,7 @@
         });
     });
 </script>
+
 {% endblock main %}
 {% block footer %}
 {% include "public/partial/footer.html" %}
@@ -138,4 +156,3 @@
 {% block scripts %}
 {% include "public/partial/scripts.html" %}
 {% endblock scripts %}
-

@@ -63,6 +63,7 @@ INSTALLED_APPS = [
     'apps.ocr',
     'apps.pdfsplit',
     'apps.mergepdf',
+    'apps.video_compression',
 
     #THIRD PARTY
     'corsheaders',
@@ -227,8 +228,10 @@ CORS_ALLOW_ALL_ORIGINS = True  # Allow all domains (use with caution)
 CORS_ALLOWED_ORIGINS = [
     "http://localhost",
     "http://0.0.0.0:8001",
-    "http://192.168.29.8",
+    "http://128.199.26.234",
     "http://uatnms.sanimabank.com",
+    'https://192.168.1.100',
+    'https://proxydhakal.dev',
 ]
 
 CORS_ALLOW_CREDENTIALS = True
@@ -266,6 +269,60 @@ LOGIN_URL = '/'
 
 CSRF_TRUSTED_ORIGINS = [
     'http://0.0.0.0:8001',  # Allow local testing
+    'http://128.199.26.234:30577',  # Allow local testing
     'https://shekhardhakal.com.np',  # Production domain
-    'https://www.shekhardhakal.com.np'
+    'https://www.shekhardhakal.com.np',
+    'https://192.168.1.100',
+    'https://proxydhakal.dev',
 ]
+
+
+#LOGGING
+LOGGING_DIR = os.path.join(BASE_DIR, "logs")
+os.makedirs(LOGGING_DIR, exist_ok=True)  # Ensure the logs directory exists
+
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "formatters": {
+        "verbose": {
+            "format": "[{asctime}] {levelname} {module} {message}",
+            "style": "{",
+        },
+        "simple": {
+            "format": "[{asctime}] {levelname} {message}",
+            "style": "{",
+        },
+    },
+    "handlers": {
+        "file": {
+            "level": "DEBUG",
+            "class": "logging.FileHandler",
+            "filename": os.path.join(LOGGING_DIR, "django.log"),
+            "formatter": "verbose",
+        },
+        "console": {
+            "level": "INFO",
+            "class": "logging.StreamHandler",
+            "formatter": "simple",
+        },
+    },
+    "loggers": {
+        "django": {
+            "handlers": ["file", "console"],
+            "level": "DEBUG",
+            "propagate": True,
+        },
+        "compressor_app": {  # Replace 'myapp' with your actual Django app name
+            "handlers": ["file", "console"],
+            "level": "DEBUG",
+            "propagate": True,
+        },
+    },
+}
+
+
+#DJANGO CELEARY
+CELERY_BROKER_URL = "redis://localhost:6379/0"
+CELERY_ACCEPT_CONTENT = ["json"]
+CELERY_TASK_SERIALIZER = "json"

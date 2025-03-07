@@ -1,0 +1,120 @@
+{% extends "public/partial/base.html" %} 
+{% load static %}
+{% block navbar %}
+{% include "public/partial/navbar.html" %}
+{% endblock navbar %}
+{% block main %}
+<!-- Hero Section -->
+<div class="hero">
+    <h1>Try Video Compression</h1>
+    <p>Upload your video files and compress them with ease!</p>
+</div>
+
+<!-- Form Section -->
+<div class="form-container mt-3 mb-3 p-3">
+    <h2>Compress Your Video</h2>
+    <form id="uploadForm" enctype="multipart/form-data" method="POST">
+        {% csrf_token %}
+        <div class="mb-3">
+            <label for="videoFile" class="form-label">Upload Video File</label>
+            <input id="videoFile" name="video_file" type="file" class="file" accept="video/*">
+        </div>
+
+        <button type="submit" class="btn btn-primary w-100">Upload & Compress</button>
+    </form>
+
+    <!-- Progress Bar Section -->
+    <div id="progress" class="progress-container" style="display: none;">
+        <p>Processing... Please wait.</p>
+    </div>
+
+    <div id="downloadLink"></div>
+</div>
+
+<style>
+    .hero {
+        padding: 4rem 0 !important;
+        text-align: center !important;
+        background: linear-gradient(135deg, #005b31, #0057A0) !important;
+        color: white !important;
+    }
+
+    .hero h1 {
+        font-size: 2rem !important;
+        font-weight: bold !important;
+        animation: fadeInUp 2s ease-out !important;
+    }
+
+    .hero p {
+        font-size: 1rem !important;
+        margin-top: 0.5rem !important;
+        animation: fadeInUp 2s ease-out 0.5s !important;
+    }
+</style>
+
+<script src="{% static 'public/js/jquery-3.6.0.min.js' %}" ></script>
+<script>
+    $(document).ready(function () {
+        $("#uploadForm").on("submit", function (e) {
+            e.preventDefault();
+            let fileInput = $("#videoFile")[0].files[0];
+            if (!fileInput) {
+                alert("Please select a file.");
+                return;
+            }
+
+            let formData = new FormData(this);
+
+            $("#progress").show();
+            $("#downloadLink").html("");
+
+            $.ajax({
+                url: "{% url 'compress_video' %}",
+                type: "POST",
+                data: formData,
+                processData: false,
+                contentType: false,
+                success: function (response) {
+                    checkTaskStatus(response.task_id);
+                },
+                error: function () {
+                    $("#progress").hide();
+                    alert("Error compressing video.");
+                }
+            });
+        });
+
+        function checkTaskStatus(taskId) {
+            let interval = setInterval(function () {
+                $.get(`/compress/video/check_status/${taskId}/`, function (data) {
+                    console.log("Task status:", data.task_status);  // Log the task status
+                    if (data.task_status === "COMPLETED") {
+                        clearInterval(interval);
+                        $.get(`/compress/get_video/${taskId}/`, function (res) {
+                            $("#progress").hide();
+                            $("#downloadLink").html(
+                                `<a href="${res.download_url}" class="btn btn-success mt-2" download>Download Compressed Video</a>`
+                            );
+                        });
+                    } else if (data.task_status.startsWith("FAILED")) {
+                        clearInterval(interval);
+                        $("#progress").hide();
+                        alert("Video compression failed: " + data.task_status);
+                    }
+                });
+            }, 2000);
+        }
+        
+    });
+</script>
+
+{% endblock main %}
+{% block footer %}
+{% include "public/partial/footer.html" %}
+{% endblock footer %}
+{% block modal %}
+{% include "public/partial/modal.html" %}
+{% endblock modal %}
+{% block scripts %}
+{% include "public/partial/scripts.html" %}
+{% endblock scripts %}

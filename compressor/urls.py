@@ -28,6 +28,7 @@ urlpatterns = [
     path('', include('apps.ocr.urls')),  # Include app-specific URLs
     path('', include('apps.pdfsplit.urls')),  # Include app-specific URLs
     path('', include('apps.mergepdf.urls')),  # Include app-specific URLs
+    path('', include('apps.video_compression.urls')),  # Include app-specific URLs
 ]+static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
 
 
