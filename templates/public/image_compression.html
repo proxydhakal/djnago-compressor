@@ -1,0 +1,149 @@
+{% extends "public/partial/base.html" %}
+{% load static %}
+
+{% block navbar %}
+    {% include "public/partial/navbar.html" %}
+{% endblock navbar %}
+
+{% block main %}
+    <div class="hero">
+        <h1>Compress Images</h1>
+        <p>Upload your images and choose a compression level!</p>
+    </div>
+
+    <div class="form-container mt-3 mb-3 p-3">
+        <h2>Compress Images</h2>
+        <form id="compressionForm" enctype="multipart/form-data" method="POST">
+            {% csrf_token %}
+            <div class="mb-3">
+                <label for="imageFiles" class="form-label">Upload Images</label>
+                <input id="imageFiles" name="image_files" type="file" accept="image/*" multiple>
+            </div>
+            <div class="mb-3">
+                <label for="compressionLevel" class="form-label">Compression Level (0-100)</label>
+                <input type="range" id="compressionLevel" name="compression_level" class="form-range" min="0" max="100" value="75">
+                <span id="compressionLevelValue">75</span>
+            </div>
+            <button type="submit" class="btn btn-primary w-100">Compress</button>
+        </form>
+
+        <div id="result" class="mt-4"></div>
+    </div>
+
+    <style>
+        .hero {
+            padding: 4rem 0;
+            text-align: center;
+            background: linear-gradient(135deg, #005b31, #0057A0);
+            color: white;
+        }
+
+        .form-container {
+            max-width: 700px;
+            margin: auto;
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            padding: 2rem;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .form-container .form-label {
+            font-weight: bold;
+        }
+
+        .form-container button {
+            background-color: #0057A0;
+            border: none;
+            color: white;
+        }
+    </style>
+
+    <script src="{% static 'public/js/jquery-3.6.0.min.js' %}"></script>
+    <script src="{% static 'public/js/fileinput.min.js' %}"></script>
+    <script>
+        $(document).ready(function () {
+            // Initialize file input plugin
+            $("#imageFiles").fileinput({
+                theme: 'fas',
+                allowedFileExtensions: ['jpg', 'jpeg', 'png', 'webp'],
+                showPreview: true,
+                browseClass: "btn btn-primary",
+                browseLabel: "Select Images",
+                showUpload: false,
+                showRemove: false,
+            });
+
+            // Update compression level value on range input change
+            $("#compressionLevel").on("input", function () {
+                $("#compressionLevelValue").text($(this).val());
+            });
+
+            // Handle form submission
+            $("#compressionForm").on("submit", function (e) {
+                e.preventDefault();
+
+                // Check if files are selected
+                let files = $("#imageFiles")[0].files;
+                if (files.length === 0) {
+                    alert("Please select at least one image file.");
+                    return;
+                }
+
+                let formData = new FormData();
+                formData.append("csrfmiddlewaretoken", "{{ csrf_token }}");
+
+                // Append selected files
+                for (let i = 0; i < files.length; i++) {
+                    formData.append("image_files", files[i]);
+                }
+                formData.append("compression_level", $("#compressionLevel").val());
+                fetch("{% url 'image_compression' %}", {
+                    method: "POST",
+                    body: formData
+                })
+                .then(response => response.json())
+                .then(data => {
+                    let resultDiv = document.getElementById("result");
+                    resultDiv.innerHTML = "";
+                    
+                    if (data.original_files && data.compressed_files) {
+                        resultDiv.innerHTML = "<h2>Download Links:</h2>";
+                        data.original_files.forEach((original, index) => {
+                            resultDiv.innerHTML += `
+                                <div>
+                                    <a class="btn btn-sm btn-primary" href="${data.compressed_files[index]}" download target="_blank">Download Compressed</a>
+                                </div>
+                                <br>
+                            `;
+                        });
+                    }
+
+                    if (data.invalid_files) {
+                        resultDiv.innerHTML += "<h3>Invalid Files:</h3><ul>";
+                        data.invalid_files.forEach(file => {
+                            resultDiv.innerHTML += `<li>${file}</li>`;
+                        });
+                        resultDiv.innerHTML += "</ul>";
+                    }
+
+                    if (data.error) {
+                        resultDiv.innerHTML = `<div class="alert alert-danger">${data.error}</div>`;
+                    }
+                })
+                .catch(error => {
+                    alert("Error: " + error);
+                });
+            });
+        });
+    </script>
+{% endblock main %}
+
+{% block footer %}
+    {% include "public/partial/footer.html" %}
+{% endblock footer %}
+{% block modal %}
+    {% include "public/partial/modal.html" %}
+{% endblock modal %}
+{% block scripts %}
+    {% include "public/partial/scripts.html" %}
+{% endblock scripts %}

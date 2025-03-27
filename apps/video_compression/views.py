@@ -35,7 +35,7 @@ class VideoCompressionView(View):
             task = compress_video.apply_async(args=[video.name])
 
             # Set the task status in Redis
-            redis_client.set(task.id, "PROCESSING", ex=600)
+            redis_client.set(task.id, "PROCESSING", ex=3600)
 
             return JsonResponse({"task_id": task.id, "message": "Compression started!"})
 
@@ -47,13 +47,20 @@ class VideoCompressionView(View):
 
 class CheckTaskStatus(View):
     def get(self, request, task_id):
-        task_status = redis_client.get(task_id) or "PENDING"
+        task_status = redis_client.get(task_id)
+        if not task_status:
+            return JsonResponse({"task_status": "EXPIRED"}, status=404)
         return JsonResponse({"task_status": task_status})
 
 class GetCompressedVideo(View):
     def get(self, request, task_id):
         output_filename = redis_client.get(f"completed:{task_id}")
-        if output_filename:
-            return JsonResponse({"download_url": f"/media/compressed/{output_filename}"})
-        return JsonResponse({"error": "File not ready"}, status=404)
+        if not output_filename:
+            return JsonResponse({"error": "File not ready"}, status=404)
+
+        output_path = os.path.join(settings.MEDIA_ROOT, "compressed", output_filename)
+        if not os.path.exists(output_path):
+            return JsonResponse({"error": "File not found"}, status=404)
+
+        return JsonResponse({"download_url": f"/media/compressed/{output_filename}"})
 

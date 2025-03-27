@@ -85,9 +85,13 @@
         });
 
         function checkTaskStatus(taskId) {
+            let attempts = 0;
+            const maxAttempts = 30; // Stop polling after 60 seconds (30 attempts * 2 seconds)
+        
             let interval = setInterval(function () {
                 $.get(`/compress/video/check_status/${taskId}/`, function (data) {
-                    console.log("Task status:", data.task_status);  // Log the task status
+                    console.log("Task status:", data.task_status);
+        
                     if (data.task_status === "COMPLETED") {
                         clearInterval(interval);
                         $.get(`/compress/get_video/${taskId}/`, function (res) {
@@ -100,6 +104,17 @@
                         clearInterval(interval);
                         $("#progress").hide();
                         alert("Video compression failed: " + data.task_status);
+                    } else if (data.task_status === "EXPIRED") {
+                        clearInterval(interval);
+                        $("#progress").hide();
+                        alert("Task expired. Please try again.");
+                    }
+        
+                    attempts++;
+                    if (attempts >= maxAttempts) {
+                        clearInterval(interval);
+                        $("#progress").hide();
+                        alert("Task took too long. Please check the status later.");
                     }
                 });
             }, 2000);

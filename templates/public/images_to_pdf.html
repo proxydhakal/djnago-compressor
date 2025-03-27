@@ -1,0 +1,119 @@
+{% extends "public/partial/base.html" %}
+{% load static %}
+{% block navbar %}
+{% include "public/partial/navbar.html" %}
+{% endblock navbar %}
+{% block main %}
+<!-- Hero Section -->
+<div class="hero">
+    <h1>Convert Images to PDF</h1>
+    <p>Upload your images (JPG, JPEG, PNG) and convert them to a PDF!</p>
+</div>
+
+<!-- Form Section -->
+<div class="form-container mt-3 mb-3 p-3">
+    <h2>Convert Images to PDF</h2>
+    <form id="imageForm" enctype="multipart/form-data" method="POST">
+        {% csrf_token %}
+        <div class="mb-3">
+            <label for="imageFiles" class="form-label">Upload Images</label>
+            <input type="file" id="imageFiles" name="image_files" class="file" accept="image/jpg, image/jpeg, image/png" multiple required>
+        </div>
+        <button type="submit" class="btn btn-primary w-100">Convert</button>
+    </form>
+
+    <!-- Result Section -->
+    <div id="result" class="mt-4"></div>
+</div>
+
+<!-- Include CSS and JS for Kartik File Input -->
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-fileinput/css/fileinput.min.css" rel="stylesheet" />
+<script src="https://cdn.jsdelivr.net/npm/bootstrap-fileinput/js/fileinput.min.js"></script>
+
+<style>
+    .hero {
+        padding: 4rem 0 !important;
+        text-align: center !important;
+        background: linear-gradient(135deg, #005b31, #0057A0) !important;
+        color: white !important;
+    }
+
+    .hero h1 {
+        font-size: 2rem !important;
+        font-weight: bold !important;
+        animation: fadeInUp 2s ease-out !important;
+    }
+
+    .hero p {
+        font-size: 1rem !important;
+        margin-top: 0.5rem !important;
+        animation: fadeInUp 2s ease-out 0.5s !important;
+    }
+
+    .form-container {
+        max-width: 600px;
+        margin: auto;
+        background-color: #f8f9fa;
+        border-radius: 8px;
+        padding: 2rem;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .form-container .form-label {
+        font-weight: bold;
+    }
+
+    .form-container button {
+        background-color: #0057A0;
+        border: none;
+        color: white;
+    }
+</style>
+
+<script src="{% static 'public/js/jquery-3.6.0.min.js' %}"></script>
+<script>
+    $(document).ready(function () {
+        // Initialize Kartik file input
+        $("#imageFiles").fileinput({
+            theme: "fa",
+            allowedFileExtensions: ["jpg", "jpeg", "png"],
+            showUpload: false,
+            previewFileType: "image",
+            maxFileCount: 5,  // Allows multiple files, adjust as needed
+            showRemove: false
+        });
+
+        $("#imageForm").on("submit", function (e) {
+            e.preventDefault();
+            let formData = new FormData(this);
+
+            fetch("{% url 'images_to_pdf' %}", {
+                method: "POST",
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                let resultDiv = document.getElementById("result");
+                if (data.pdf_url) {
+                    resultDiv.innerHTML = `<h2>Download PDF:</h2><a href="${data.pdf_url}" class="btn btn-success" download>Download PDF</a>`;
+                } else if (data.error) {
+                    resultDiv.innerHTML = `<p style="color: red;">${data.error}</p>`;
+                }
+            })
+            .catch(error => {
+                alert("Error: " + error);
+            });
+        });
+    });
+</script>
+
+{% endblock main %}
+{% block footer %}
+{% include "public/partial/footer.html" %}
+{% endblock footer %}
+{% block modal %}
+{% include "public/partial/modal.html" %}
+{% endblock modal %}
+{% block scripts %}
+{% include "public/partial/scripts.html" %}
+{% endblock scripts %}

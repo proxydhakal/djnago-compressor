@@ -18,6 +18,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 # Load environment variables from .env file
 load_dotenv(BASE_DIR / '.env')
+from datetime import datetime
 
 
 # Quick-start development settings - unsuitable for production
@@ -64,6 +65,9 @@ INSTALLED_APPS = [
     'apps.pdfsplit',
     'apps.mergepdf',
     'apps.video_compression',
+    'apps.imagestopdf',
+    'apps.pdftoimages',
+    'apps.pdftoword',
 
     #THIRD PARTY
     'corsheaders',
@@ -222,7 +226,7 @@ SESSION_COOKIE_AGE = int(os.getenv('SESSION_COOKIE_AGE', 15860))  # Example: 158
 DATA_UPLOAD_MAX_MEMORY_SIZE = 104857600  # 100MB in bytes
 
 # CORS configuration
-CORS_ALLOW_ALL_ORIGINS = True  # Allow all domains (use with caution)
+CORS_ALLOW_ALL_ORIGINS = False  # Disable all domains (use with caution)
 
 # OR allow specific origins
 CORS_ALLOWED_ORIGINS = [
@@ -278,51 +282,51 @@ CSRF_TRUSTED_ORIGINS = [
 
 
 #LOGGING
-LOGGING_DIR = os.path.join(BASE_DIR, "logs")
-os.makedirs(LOGGING_DIR, exist_ok=True)  # Ensure the logs directory exists
+# Ensure the logs folder exists
+LOGS_DIR = os.path.join(BASE_DIR, 'logs')
+if not os.path.exists(LOGS_DIR):
+    os.makedirs(LOGS_DIR)
 
+# Logging Configuration
 LOGGING = {
-    "version": 1,
-    "disable_existing_loggers": False,
-    "formatters": {
-        "verbose": {
-            "format": "[{asctime}] {levelname} {module} {message}",
-            "style": "{",
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'verbose': {
+            'format': '{levelname} {asctime} {module} {message}',
+            'style': '{',
         },
-        "simple": {
-            "format": "[{asctime}] {levelname} {message}",
-            "style": "{",
-        },
-    },
-    "handlers": {
-        "file": {
-            "level": "DEBUG",
-            "class": "logging.FileHandler",
-            "filename": os.path.join(LOGGING_DIR, "django.log"),
-            "formatter": "verbose",
-        },
-        "console": {
-            "level": "INFO",
-            "class": "logging.StreamHandler",
-            "formatter": "simple",
+        'simple': {
+            'format': '{levelname} {message}',
+            'style': '{',
         },
     },
-    "loggers": {
-        "django": {
-            "handlers": ["file", "console"],
-            "level": "DEBUG",
-            "propagate": True,
+    'handlers': {
+        'file': {
+            'level': 'DEBUG',  # Capture all log levels (DEBUG, INFO, WARNING, ERROR, CRITICAL)
+            'class': 'logging.FileHandler',
+            'filename': os.path.join(LOGS_DIR, f"{datetime.now().strftime('%Y-%m-%d')}.log"),
+            'formatter': 'verbose',
         },
-        "compressor_app": {  # Replace 'myapp' with your actual Django app name
-            "handlers": ["file", "console"],
-            "level": "DEBUG",
-            "propagate": True,
+    },
+    'loggers': {
+        'django.request': {
+            'handlers': ['file'],
+            'level': 'DEBUG',  # Log all Django request-related issues
+            'propagate': True,
+        },
+        'django.security': {
+            'handlers': ['file'],
+            'level': 'DEBUG',  # Log all security-related issues in Django
+            'propagate': True,
         },
     },
 }
 
-
 #DJANGO CELEARY
-CELERY_BROKER_URL = "redis://localhost:6379/0"
+if ENVIRONMENT == 'production':
+    CELERY_BROKER_URL = os.getenv('CELERY_BROKER_URL_PROD', 'redis://default_prod_url:6379/0')
+else:
+    CELERY_BROKER_URL = os.getenv('CELERY_BROKER_URL_DEV', 'redis://localhost:6379/0')
 CELERY_ACCEPT_CONTENT = ["json"]
 CELERY_TASK_SERIALIZER = "json"

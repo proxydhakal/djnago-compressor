@@ -85,8 +85,7 @@
 
 <script src="{% static 'public/js/jquery-3.6.0.min.js' %}" ></script>
 <script src="{% static 'public/js/fileinput.min.js' %}" ></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.10.377/pdf.min.js"></script>
-
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
 <script>
     $(document).ready(function () {
         // Initialize file input
@@ -125,29 +124,28 @@
                         var fileInput = document.getElementById('file').files[0];
 
                         const reader = new FileReader();
-                        reader.onload = function(event) {
-                            const typedArray = new Uint8Array(event.target.result);
+                        reader.onload = async function(event) {
+                            const pdfBytes = new Uint8Array(event.target.result);
 
-                            // Use PDF.js to load the document
-                            pdfjsLib.getDocument(typedArray).promise.then(function(pdf) {
-                                const totalPages = pdf.numPages;
-                                
-                                // Render each page preview
-                                for (let i = 1; i <= totalPages; i++) {
-                                    renderPagePreview(pdf, i);
-                                }
+                            // Use PDF-lib to load the document
+                            const pdfDoc = await PDFLib.PDFDocument.load(pdfBytes);
+                            const totalPages = pdfDoc.getPages().length;
 
-                                // Display pages for selection
-                                response.pages.forEach(function (page) {
-                                    $('#pages-list').append(`
-                                        <div class="form-check">
-                                            <input class="form-check-input" type="checkbox" value="${page}" id="page${page}">
-                                            <label class="form-check-label" for="page${page}">
-                                                Page ${page + 1}
-                                            </label>
-                                        </div>
-                                    `);
-                                });
+                            // Render each page preview
+                            for (let i = 0; i < totalPages; i++) {
+                                renderPagePreview(pdfDoc, i);
+                            }
+
+                            // Display pages for selection
+                            response.pages.forEach(function (page) {
+                                $('#pages-list').append(`
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" value="${page}" id="page${page}">
+                                        <label class="form-check-label" for="page${page}">
+                                            Page ${page + 1}
+                                        </label>
+                                    </div>
+                                `);
                             });
                         };
                         reader.readAsArrayBuffer(fileInput);
@@ -198,30 +196,31 @@
             });
         });
 
-        // Function to render page previews
-        function renderPagePreview(pdf, pageNum) {
-            pdf.getPage(pageNum).then(function(page) {
-                const canvas = document.createElement('canvas');
-                const context = canvas.getContext('2d');
-                const scale = 0.5;  // Scale down to fit 200x200 px
-                const viewport = page.getViewport({ scale: scale });
+        // Function to render page previews using PDF-lib
+        async function renderPagePreview(pdfDoc, pageNum) {
+            const page = pdfDoc.getPages()[pageNum];
+            const viewport = page.getViewport({ scale: 0.5 });
 
-                canvas.height = 300;
-                canvas.width = 250;
+            // Create canvas and render page on it
+            const canvas = document.createElement('canvas');
+            const context = canvas.getContext('2d');
+            canvas.height = 300;
+            canvas.width = 250;
 
-                page.render({ canvasContext: context, viewport: viewport }).promise.then(function() {
-                    // After rendering, append the canvas to the preview container
-                    const previewContainer = document.getElementById('pages-preview-container');
-                    const previewElement = document.createElement('div');
-                    previewElement.classList.add('col-md-3', 'mb-4', 'page-preview');  // Use col-md-3 for 4 columns
-                    previewElement.appendChild(canvas);
+            // Render page on the canvas
+            const img = await page.render({ context, viewport });
 
-                    previewContainer.appendChild(previewElement);
-                });
-            });
+            // After rendering, append the canvas to the preview container
+            const previewContainer = document.getElementById('pages-preview-container');
+            const previewElement = document.createElement('div');
+            previewElement.classList.add('col-md-3', 'mb-4', 'page-preview');  // Use col-md-3 for 4 columns
+            previewElement.appendChild(canvas);
+
+            previewContainer.appendChild(previewElement);
         }
     });
 </script>
+
 
 {% endblock main %}
 {% block footer %}

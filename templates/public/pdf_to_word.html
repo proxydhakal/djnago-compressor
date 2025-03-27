@@ -1,0 +1,105 @@
+{% extends "public/partial/base.html" %}
+{% load static %}
+
+{% block navbar %}
+    {% include "public/partial/navbar.html" %}
+{% endblock navbar %}
+
+{% block main %}
+    <div class="hero">
+        <h1>Convert PDF to Word</h1>
+        <p>Upload your PDF and get a Word file instantly!</p>
+    </div>
+
+    <div class="form-container mt-3 mb-3 p-3">
+        <h2>Upload PDF</h2>
+        <form id="pdfToWordForm" enctype="multipart/form-data" method="POST">
+            {% csrf_token %}
+            <div class="mb-3">
+                <label for="pdfFile" class="form-label">Select PDF</label>
+                <input id="pdfFile" name="pdf_file" type="file" accept="application/pdf" class="form-control">
+            </div>
+            <button type="submit" class="btn btn-primary w-100">Convert</button>
+        </form>
+
+        <div id="result" class="mt-4"></div>
+    </div>
+
+    <style>
+        .hero {
+            padding: 4rem 0;
+            text-align: center;
+            background: linear-gradient(135deg, #005b31, #0057A0);
+            color: white;
+        }
+
+        .form-container {
+            max-width: 700px;
+            margin: auto;
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            padding: 2rem;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .form-container .form-label {
+            font-weight: bold;
+        }
+
+        .form-container button {
+            background-color: #0057A0;
+            border: none;
+            color: white;
+        }
+    </style>
+
+    <script src="{% static 'public/js/jquery-3.6.0.min.js' %}"></script>
+    <script>
+        $(document).ready(function () {
+            function getCSRFToken() {
+                return document.querySelector("[name=csrfmiddlewaretoken]").value;
+            }
+
+            $("#pdfToWordForm").on("submit", function (e) {
+                e.preventDefault();
+
+                let formData = new FormData();
+                formData.append("pdf_file", $("#pdfFile")[0].files[0]);
+
+                $("#result").html("<p><strong>Processing...</strong></p>");
+
+                fetch("{% url 'pdf_to_word' %}", {
+                    method: "POST",
+                    headers: {
+                        "X-CSRFToken": getCSRFToken()
+                    },
+                    body: formData
+                })
+                .then(response => response.json())
+                .then(data => {
+                    let resultDiv = $("#result");
+                    resultDiv.html("");
+
+                    if (data.success) {
+                        resultDiv.html(`<p><a class="btn btn-success" href="${data.download_url}" download>Download Word File</a></p>`);
+                    } else {
+                        resultDiv.html(`<p class="text-danger">${data.error}</p>`);
+                    }
+                })
+                .catch(error => {
+                    $("#result").html("<p class='text-danger'>Error processing the request.</p>");
+                });
+            });
+        });
+    </script>
+{% endblock main %}
+
+{% block footer %}
+    {% include "public/partial/footer.html" %}
+{% endblock footer %}
+{% block modal %}
+    {% include "public/partial/modal.html" %}
+{% endblock modal %}
+{% block scripts %}
+    {% include "public/partial/scripts.html" %}
+{% endblock scripts %}

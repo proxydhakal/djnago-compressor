@@ -1,9 +1,10 @@
-{% extends "public/partial/base.html" %} 
+{% extends "public/partial/base.html" %}
 {% load static %}
 {% block navbar %}
 {% include "public/partial/navbar.html" %}
 {% endblock navbar %}
 {% block main %}
+
 <!-- Hero Section -->
 <div class="hero">
     <div>
@@ -13,122 +14,149 @@
 </div>
 
 <!-- Features Section -->
-<div class="features">
-    <div class="feature-card">
-        <i class="fas fa-file-import"></i>
-        <h5>Merge PDFs</h5>
-        <p>Combine multiple PDF files into one.</p>
-        <a href="{% url "merge_pdfs" %}" ><button>Start</button></a>
+<div class="container py-5">
+    <div class="row" id="feature-cards-container"> <!-- Container for feature cards -->
+        <!-- First Four Feature Cards (Visible initially) -->
+        <div class="col-3">
+            <div class="feature-card">
+                <i class="fas fa-file-import"></i>
+                <h5>Merge PDFs</h5>
+                <p>Combine multiple PDF files into one.</p>
+                <a href="{% url 'merge_pdfs' %}"><button>Start</button></a>
+            </div>
+        </div>
+        <div class="col-3">
+            <div class="feature-card">
+                <i class="fas fa-file-export"></i>
+                <h5>Split PDFs</h5>
+                <p>Extract pages from your PDF document.</p>
+                <a href="{% url 'upload_pdf_split' %}"><button>Start</button></a>
+            </div>
+        </div>
+        <div class="col-3">
+            <div class="feature-card">
+                <i class="fas fa-compress"></i>
+                <h5>Compress PDFs</h5>
+                <p>Reduce file size for easy sharing.</p>
+                <a href="{% url 'upload_and_compress' %}"><button>Start</button></a>
+            </div>
+        </div>
+        <div class="col-3">
+            <div class="feature-card">
+                <i class="fas fa-file-word"></i>
+                <h5>Word to PDF</h5>
+                <p>Convert Word documents to PDF format.</p>
+                <a href="{% url 'upload_and_convert' %}"><button>Start</button></a>
+            </div>
+        </div>
+        
+        <!-- Hidden Feature Cards (Initially hidden, will be shown after "See More" click) -->
+        <div class="col-3 more-feature">
+            <div class="feature-card">
+                <i class="fas fa-video"></i>
+                <h5>Compress Video</h5>
+                <p>Convert your video to less MB.</p>
+                <a href="{% url 'compress_video' %}"><button>Start</button></a>
+            </div>
+        </div>
+        <div class="col-3 more-feature">
+            <div class="feature-card">
+                <i class="fas fa-images"></i>
+                <h5>Compress Images</h5>
+                <p>Compress your image to less MB.</p>
+                <a href="{% url 'image_compression' %}"><button>Start</button></a>
+            </div>
+        </div>
+        <div class="col-3 more-feature">
+            <div class="feature-card">
+                <i class="fa-solid fa-file-pdf"></i>
+                <h5>Images to PDF</h5>
+                <p>Convert your images to PDF format.</p>
+                <a href="{% url 'images_to_pdf' %}"><button>Start</button></a>
+            </div>
+        </div>
+        <div class="col-3 more-feature">
+            <div class="feature-card">
+                <i class="fas fa-file-image"></i>
+                <h5>PDF to Images</h5>
+                <p>Convert your PDF pages into images.</p>
+                <a href="{% url 'pdf_to_images' %}"><button>Start</button></a>
+            </div>
+        </div>
+        <div class="col-3 more-feature">
+            <div class="feature-card">
+                <i class="fa-solid fa-file-word"></i>
+                <h5>PDF to Word</h5>
+                <p>Convert PDF pages into word.</p>
+                <a href="{% url 'pdf_to_word_page' %}"><button>Start</button></a>
+            </div>
+        </div>
     </div>
-    <div class="feature-card">
-        <i class="fas fa-file-export"></i>
-        <h5>Split PDFs</h5>
-        <p>Extract pages from your PDF document.</p>
-        <a href="{% url "upload_pdf_split" %}" ><button>Start</button></a>
-    </div>
-    <div class="feature-card">
-        <i class="fas fa-compress"></i>
-        <h5>Compress PDFs</h5>
-        <p>Reduce file size for easy sharing.</p>
-        <a href="{% url 'upload_and_compress' %}"><button>Start</button></a>
-    </div>
-    <div class="feature-card">
-        <i class="fas fa-file-word"></i>
-        <h5>Word to PDF</h5>
-        <p>Convert Word documents to PDF format.</p>
-        <a href="{% url "upload_and_convert" %}"><button>Start</button></a>
-    </div>
-    <div class="feature-card">
-        <i class="fas fa-video"></i>
-        <h5>Compress Video</h5>
-        <p>Convert your video to less MB.</p>
-        <a href="{% url "compress_video" %}"><button>Start</button></a>
-    </div>
-</div>
 
-<!-- Popup Container -->
-<div id="popup" class="popup">
-    <div class="popup-content">
-        <h4>Features Coming Soon</h4>
-        <button class="btn btn-primary" onclick="closePopup()">OK</button>
+    <!-- See More / View Less Button -->
+    <div class="text-center mt-3">
+        <button class="btn btn-primary btn-rounded p-2" id="see-more-btn" onclick="toggleFeatures()">See More</button>
     </div>
 </div>
 
 <style>
-
     .hero {
-        padding: 4rem 0 !important;
-        text-align: center !important;
-        background: linear-gradient(135deg, #005b31, #0057A0) !important;
-        color: white !important;
+        padding: 4rem 0;
+        text-align: center;
+        background: linear-gradient(135deg, #005b31, #0057A0);
+        color: white;
     }
 
     .hero h1 {
-        font-size: 2rem !important;
-        font-weight: bold !important;
-        animation: fadeInUp 2s ease-out !important;
+        font-size: 2rem;
+        font-weight: bold;
+        animation: fadeInUp 2s ease-out;
     }
 
     .hero p {
-        font-size: 1rem !important;
-        margin-top: 0.5rem !important;
-        animation: fadeInUp 2s ease-out 0.5s !important;
+        font-size: 1rem;
+        margin-top: 0.5rem;
+        animation: fadeInUp 2s ease-out 0.5s;
+    }
+
+    .feature-card {
+        padding: 20px;
+        background: linear-gradient(135deg, #ffffff, #d9e2f3);
+        border-radius: 10px;
+        box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+        text-align: center;
+        margin-bottom: 20px;
+        display: block;
+    }
+
+    .feature-card button {
+        margin-top: 10px;
+    }
+
+    /* Initially hide the additional feature cards */
+    .more-feature {
+        display: none;
     }
 </style>
-<!-- Styles -->
 
-<!-- Styles -->
-<style>
-    .features {
-        display: flex;
-        gap: 20px;
+<script>
+    function toggleFeatures() {
+        var $moreFeatures = $('.more-feature');
+        var $seeMoreBtn = $('#see-more-btn');
+        
+        // Toggle visibility of the additional feature cards
+        $moreFeatures.toggle();
+
+        // Toggle button text between "See More" and "View Less"
+        if ($seeMoreBtn.text() === 'See More') {
+            $seeMoreBtn.text('View Less');
+        } else {
+            $seeMoreBtn.text('See More');
+        }
     }
-    .feature-card {
-        border: 1px solid #ddd;
-        padding: 20px;
-        cursor: pointer;
-        transition: transform 0.3s ease-in-out;
-        border-radius: 10px;
-        background: linear-gradient(135deg, #f8f9fa, #e9ecef);
-        box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
-    }
-    .feature-card:hover {
-        transform: scale(1.05);
-    }
-    .popup {
-        display: none;
-        position: fixed;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        background: white;
-        padding: 30px;
-        border-radius: 15px;
-        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
-        text-align: center;
-        animation: fadeIn 0.3s ease-in-out;
-    }
-    .popup-content h4 {
-        margin-bottom: 15px;
-        font-weight: bold;
-        color: #000;
-    }
-    @keyframes fadeIn {
-        from { opacity: 0; transform: translate(-50%, -55%); }
-        to { opacity: 1; transform: translate(-50%, -50%); }
-    }
-    </style>
-    
-    <!-- Script -->
-    <script>
-    function showPopup() {
-        document.getElementById("popup").style.display = "block";
-    }
-    function closePopup() {
-        document.getElementById("popup").style.display = "none";
-    }
-    </script>
-    
+</script>
+
+
 {% endblock main %}
 {% block footer %}
 {% include "public/partial/footer.html" %}
@@ -139,4 +167,3 @@
 {% block scripts %}
 {% include "public/partial/scripts.html" %}
 {% endblock scripts %}
-
